@@ -1,4 +1,4 @@
-package com.fiap.posTech.parquimetro.controller;
+package com.fiap.posTech.parquimetro.handler;
 
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
