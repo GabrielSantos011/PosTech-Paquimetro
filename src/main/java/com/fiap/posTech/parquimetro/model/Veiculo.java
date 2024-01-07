@@ -20,6 +20,7 @@ public class Veiculo {
     private String cor;
     private Year anoFabrica;
     private Year anoModelo;
+    private String placa;
 
     @Version
     private Long version;
