@@ -1,4 +1,5 @@
 package com.fiap.posTech.parquimetro.model;
+
 public enum EnumPagamento {
     DINHEIRO("1", "DINHEIRO"),
     DEBITO("2", "DEBITO"),

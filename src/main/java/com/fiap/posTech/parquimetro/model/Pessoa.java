@@ -15,7 +15,7 @@ import java.time.LocalDate;
 public class Pessoa {
     @Id
     private String codigo;
-    private Integer cpf;
+    private String cpf;
     private String rg;
     private String nome;
     private LocalDate dataNascimento;
@@ -24,6 +24,7 @@ public class Pessoa {
 
     @DBRef
     private Endereco endereco;
+    private Veiculo veiculo;
 
     @Version
     private Long version;

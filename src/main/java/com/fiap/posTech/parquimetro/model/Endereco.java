@@ -1,18 +1,18 @@
 package com.fiap.posTech.parquimetro.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document("endereco")
 @Data
-@NoArgsConstructor
+@AllArgsConstructor
 public class Endereco {
     @Id
     private String codigo;
-    private Integer cep;
+    private String cep;
     private String tipoLogradouro; //Trabalho, Home, etc
     private String logradouro;
     private String numero;
@@ -23,4 +23,6 @@ public class Endereco {
 
     @Version
     private Long version;
+
+    public Endereco() {}
 }

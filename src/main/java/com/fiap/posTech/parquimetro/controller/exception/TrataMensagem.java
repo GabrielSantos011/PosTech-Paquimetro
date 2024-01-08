@@ -1,4 +1,4 @@
-package com.fiap.posTech.parquimetro.exception;
+package com.fiap.posTech.parquimetro.controller.exception;
 
 public class TrataMensagem {
     public String TrataMensagemErro(String message) {
