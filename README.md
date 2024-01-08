@@ -4,3 +4,5 @@ Tech Challenge para FIAP - Fase 2 Pos Tech Arquitetura e Desenvolvimento Java
 Por meio desta aplicação utilizamos todos os conhecimentos obtidos na Fase 2, sendo eles Java 17, Spring II,
 Spring Data com NoSQL, Persistencia de Dados e documentação com swagger.<br>
 Documentação disponível em: 
+
+Documentação swagger -> http://localhost:8080/swagger-ui/index.html
