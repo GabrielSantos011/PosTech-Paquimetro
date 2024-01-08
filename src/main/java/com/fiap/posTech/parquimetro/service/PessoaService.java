@@ -7,7 +7,9 @@ import com.fiap.posTech.parquimetro.dto.VeiculoDTO;
 import com.fiap.posTech.parquimetro.model.Endereco;
 import com.fiap.posTech.parquimetro.model.Pessoa;
 import com.fiap.posTech.parquimetro.model.Veiculo;
+import com.fiap.posTech.parquimetro.repository.EnderecoRepository;
 import com.fiap.posTech.parquimetro.repository.PessoaRepository;
+import com.fiap.posTech.parquimetro.repository.VeiculoRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,14 +22,19 @@ import org.springframework.stereotype.Service;
 public class PessoaService {
 
     private final PessoaRepository repository;
+    private final EnderecoRepository enderecoRepository;
+    private final VeiculoRepository veiculoRepository;
     private final ModelMapper modelMapper;
     private final MongoTemplate mongoTemplate;
 
     @Autowired
-    public PessoaService(PessoaRepository repository, ModelMapper modelMapper, MongoTemplate mongoTemplate) {
+    public PessoaService(PessoaRepository repository, ModelMapper modelMapper, MongoTemplate mongoTemplate,
+                         EnderecoRepository enderecoRepository, VeiculoRepository veiculoRepository) {
         this.repository = repository;
         this.modelMapper = modelMapper;
         this.mongoTemplate = mongoTemplate;
+        this.enderecoRepository = enderecoRepository;
+        this.veiculoRepository = veiculoRepository;
     }
 
     public Page<PessoaDTO> findAll(Pageable pageable) {
@@ -44,11 +51,13 @@ public class PessoaService {
         Pessoa pessoa = toPessoa(pessoaDTO);
         if (pessoaDTO.getEnderecoDTO() != null) {
             Endereco endereco = toEndereco(pessoaDTO.getEnderecoDTO());
+            enderecoRepository.save(endereco);
             pessoa.setEndereco(endereco);
         }
 
         if (pessoaDTO.getVeiculoDTO() != null) {
             Veiculo veiculo = toVeiculo(pessoaDTO.getVeiculoDTO());
+            veiculoRepository.save(veiculo);
             pessoa.setVeiculo(veiculo);
         }
         pessoa = repository.save(pessoa);

@@ -24,6 +24,7 @@ public class Pessoa {
 
     @DBRef
     private Endereco endereco;
+    @DBRef
     private Veiculo veiculo;
 
     @Version
