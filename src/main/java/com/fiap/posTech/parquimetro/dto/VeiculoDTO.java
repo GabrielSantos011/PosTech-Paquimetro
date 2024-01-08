@@ -1,12 +1,19 @@
 package com.fiap.posTech.parquimetro.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.Year;
 
-public record VeiculoDTO(
-        String modelo,
-        String cor,
-        Year anoFabrica,
-        Year anoModelo,
-        String placa
-) {
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class VeiculoDTO {
+    String modelo;
+    String cor;
+    String anoFabrica;
+    String anoModelo;
+    String placa;
 }
+

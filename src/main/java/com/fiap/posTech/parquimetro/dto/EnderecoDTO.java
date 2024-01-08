@@ -1,13 +1,22 @@
 package com.fiap.posTech.parquimetro.dto;
 
-public record EnderecoDTO(
-        Integer cep,
-        String tipoLogradouro,
-        String logradouro,
-        String numero,
-        String complemento,
-        String bairro,
-        String cidade,
-        String uf
-) {
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class EnderecoDTO {
+
+    private String codigo;
+    private String tipoLogradouro;
+    private String logradouro;
+    private String numero;
+    private String complemento;
+    private String bairro;
+    private String cidade;
+    private String uf;
+    private String cep;
+
 }
