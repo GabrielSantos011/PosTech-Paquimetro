@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.br.CPF;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -24,5 +25,5 @@ public class PessoaDTO {
         String celular;
         LocalDate dataNascimento;
         EnderecoDTO enderecoDTO;
-        VeiculoDTO veiculoDTO;
+        List<VeiculoDTO> veiculosDTO;
 }

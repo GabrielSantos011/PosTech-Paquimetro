@@ -10,6 +10,7 @@ import java.time.Year;
 @AllArgsConstructor
 @NoArgsConstructor
 public class VeiculoDTO {
+    String id;
     String modelo;
     String cor;
     String anoFabrica;

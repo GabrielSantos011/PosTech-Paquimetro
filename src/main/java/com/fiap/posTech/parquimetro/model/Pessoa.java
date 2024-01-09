@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Document("pessoa")
 @Data
@@ -24,9 +25,10 @@ public class Pessoa {
 
     @DBRef
     private Endereco endereco;
-    @DBRef
-    private Veiculo veiculo;
+    @DBRef(lazy = true)
+    private List<Veiculo> veiculos;
 
     @Version
     private Long version;
+
 }

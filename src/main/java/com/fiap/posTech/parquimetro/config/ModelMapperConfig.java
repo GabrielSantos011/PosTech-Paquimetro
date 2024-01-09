@@ -8,8 +8,12 @@ import com.fiap.posTech.parquimetro.model.Pessoa;
 import com.fiap.posTech.parquimetro.model.Veiculo;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
+import org.modelmapper.TypeMap;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Configuration
 public class ModelMapperConfig {
@@ -35,10 +39,22 @@ public class ModelMapperConfig {
                 .addMapping(Veiculo::getAnoModelo, VeiculoDTO::setAnoModelo)
                 .addMapping(Veiculo::getPlaca, VeiculoDTO::setPlaca);
 
-        modelMapper.createTypeMap(Pessoa.class, PessoaDTO.class)
-                .addMapping(src -> src.getEndereco(), PessoaDTO::setEnderecoDTO)
-                .addMapping(src -> src.getVeiculo(), PessoaDTO::setVeiculoDTO);
+        TypeMap<Pessoa, PessoaDTO> typeMap = modelMapper.createTypeMap(Pessoa.class, PessoaDTO.class);
+        typeMap.addMapping(src -> src.getEndereco(), PessoaDTO::setEnderecoDTO);
+        typeMap.addMappings(mapper -> mapper.map(
+                src -> mapVeiculosToVeiculoDTOList(src.getVeiculos()), PessoaDTO::setVeiculosDTO
+        ));
 
         return modelMapper;
+    }
+
+    private List<VeiculoDTO> mapVeiculosToVeiculoDTOList(List<Veiculo> veiculos) {
+        return veiculos != null ?
+                veiculos.stream().map(this::toVeiculoDTO).collect(Collectors.toList()) : null;
+    }
+
+    private VeiculoDTO toVeiculoDTO(Veiculo veiculo) {
+        ModelMapper modelMapper = new ModelMapper();
+        return modelMapper.map(veiculo, VeiculoDTO.class);
     }
 }
