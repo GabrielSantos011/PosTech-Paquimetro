@@ -1,7 +1,9 @@
 package com.fiap.posTech.parquimetro.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Singular;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -13,6 +15,7 @@ import java.util.List;
 @Document("pessoa")
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class Pessoa {
     @Id
     private String codigo;
@@ -25,7 +28,9 @@ public class Pessoa {
 
     @DBRef
     private Endereco endereco;
-    @DBRef(lazy = true)
+
+    @Singular
+    @DBRef
     private List<Veiculo> veiculos;
 
     @Version

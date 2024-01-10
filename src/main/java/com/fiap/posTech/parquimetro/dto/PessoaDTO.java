@@ -1,5 +1,6 @@
 package com.fiap.posTech.parquimetro.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -24,6 +25,8 @@ public class PessoaDTO {
         String rg;
         String celular;
         LocalDate dataNascimento;
+        @JsonProperty("endereco")
         EnderecoDTO enderecoDTO;
+        @JsonProperty("veiculos")
         List<VeiculoDTO> veiculosDTO;
 }
