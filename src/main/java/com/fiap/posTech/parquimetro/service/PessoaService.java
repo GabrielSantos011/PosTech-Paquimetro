@@ -13,10 +13,15 @@ import com.fiap.posTech.parquimetro.repository.VeiculoRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,15 +36,22 @@ public class PessoaService {
     private final ModelMapper modelMapper;
     private final MongoTemplate mongoTemplate;
 
+    @ExceptionHandler(OptimisticLockingFailureException.class)
+    public ResponseEntity<String> handleOptimistcLockingFaulureException(
+            OptimisticLockingFailureException ex) {
+        return  ResponseEntity.status(HttpStatus.CONFLICT).
+                body("Erro de concorrência: A Pessoa foi atualizado por outro usuario");
+    }
+
     public Page<PessoaDTO> findAll(Pageable pageable) {
         return pessoaRepository.findAll(pageable).map(this::toPessoaDTO);
     }
-
+    @Transactional
     public PessoaDTO findById(String codigo) {
         Pessoa pessoa = pessoaRepository.findById(codigo).orElseThrow(() -> new ControllerNotFoundException("Usuario não encontrado"));
         return toPessoaDTO(pessoa);
     }
-
+    @Transactional
     public PessoaDTO save(PessoaDTO pessoaDTO) {
         Pessoa pessoa = toPessoa(pessoaDTO);
         if (pessoaDTO.getEnderecoDTO() != null) {
@@ -62,7 +74,7 @@ public class PessoaService {
         pessoa = pessoaRepository.save(pessoa);
         return toPessoaDTO(pessoa);
     }
-
+    @Transactional
     public PessoaDTO update(String codigo, PessoaDTO pessoaDTO) {
         try {
             Pessoa pessoa = pessoaRepository.findById(codigo)
@@ -110,7 +122,7 @@ public class PessoaService {
         }
 
     }
-
+    @Transactional
     public void delete(String codigo) {
         pessoaRepository.deleteById(codigo);
     }
