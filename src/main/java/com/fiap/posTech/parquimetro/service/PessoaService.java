@@ -1,6 +1,7 @@
 package com.fiap.posTech.parquimetro.service;
 
 import com.fiap.posTech.parquimetro.controller.exception.ControllerNotFoundException;
+import com.fiap.posTech.parquimetro.controller.exception.CustomException;
 import com.fiap.posTech.parquimetro.controller.exception.FormaPagamentoInvalidaException;
 import com.fiap.posTech.parquimetro.dto.EnderecoDTO;
 import com.fiap.posTech.parquimetro.dto.PessoaDTO;
@@ -45,9 +46,15 @@ public class PessoaService {
         return pessoaRepository.findAll(pageable).map(this::toPessoaDTO);
     }
     @Transactional
-    public PessoaDTO findById(String codigo) {
-        Pessoa pessoa = pessoaRepository.findById(codigo).orElseThrow(() -> new ControllerNotFoundException("Usuario não encontrado"));
-        return toPessoaDTO(pessoa);
+    public PessoaDTO findById(String id) {
+        try {
+            Pessoa pessoa = pessoaRepository.findById(id).orElseThrow(() -> new ControllerNotFoundException("Usuário não encontrado"));
+            return toPessoaDTO(pessoa);
+        } catch (ControllerNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new CustomException("Erro ao buscar usuário", HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error");
+        }
     }
     @Transactional
     public PessoaDTO save(PessoaDTO pessoaDTO) {
@@ -73,9 +80,9 @@ public class PessoaService {
         return toPessoaDTO(pessoa);
     }
     @Transactional
-    public PessoaDTO update(String codigo, PessoaDTO pessoaDTO) {
+    public PessoaDTO update(String id, PessoaDTO pessoaDTO) {
         try {
-            Pessoa pessoa = pessoaRepository.findById(codigo)
+            Pessoa pessoa = pessoaRepository.findById(id)
                     .orElseThrow(() -> new ControllerNotFoundException("Usuario não encontrado"));
             pessoa.setNome(pessoaDTO.getNome());
             pessoa.setEmail(pessoaDTO.getEmail());
@@ -118,13 +125,13 @@ public class PessoaService {
             pessoa = pessoaRepository.save(pessoa);
             return toPessoaDTO(pessoa);
         } catch (EntityNotFoundException e) {
-            throw new ControllerNotFoundException("Usuario com id:" + codigo + " não encontrado");
+            throw new ControllerNotFoundException("Usuario com id:" + id + " não encontrado");
         }
 
     }
     @Transactional
-    public void delete(String codigo) {
-        pessoaRepository.deleteById(codigo);
+    public void delete(String id) {
+        pessoaRepository.deleteById(id);
     }
 
     @Transactional

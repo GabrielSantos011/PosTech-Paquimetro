@@ -1,8 +1,10 @@
 package com.fiap.posTech.parquimetro.controller.exception;
 
-public class ControllerNotFoundException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class ControllerNotFoundException extends CustomException {
     public ControllerNotFoundException(String message) {
-        super(message);
+        super(message, HttpStatus.NOT_FOUND.value(), "Not Found");
     }
 
 }

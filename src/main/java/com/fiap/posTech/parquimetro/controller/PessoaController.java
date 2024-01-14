@@ -1,5 +1,6 @@
 package com.fiap.posTech.parquimetro.controller;
 
+import com.fiap.posTech.parquimetro.controller.exception.ErrorResponse;
 import com.fiap.posTech.parquimetro.controller.exception.FormaPagamentoInvalidaException;
 import com.fiap.posTech.parquimetro.dto.PessoaDTO;
 import com.fiap.posTech.parquimetro.model.EnumPagamento;
@@ -15,11 +16,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
 @RestController
 @RequestMapping(value = "/pessoas", produces = {"application/json"})
-@Tag(name = "pessoas", description = "Crud de Pessoas com o respectivo endereço e veículos")
+@Tag(name = "Cadastro de Pessoas", description = "CRUD de Pessoas com o respectivo endereço e veículos")
 public class PessoaController {
 
     @Autowired
@@ -43,9 +42,22 @@ public class PessoaController {
 
     @PostMapping
     @Operation(summary = "Cadastrar uma nova pessoa", method = "POST")
-    public ResponseEntity<PessoaDTO> save(@Valid @RequestBody PessoaDTO pessoaDTO) {
-        PessoaDTO savedPessoa = pessoaService.save(pessoaDTO);
-        return new ResponseEntity<>(savedPessoa, HttpStatus.CREATED);
+    public ResponseEntity<?> save(@Valid @RequestBody PessoaDTO pessoaDTO,
+                                          @RequestParam String formaPagamento) {
+        try {
+            if (!EnumPagamento.contains(formaPagamento)) {
+                throw new FormaPagamentoInvalidaException("Método de Pagamento Inválido");
+            }
+            EnumPagamento metodoPagamento = EnumPagamento.valueOf(formaPagamento.toUpperCase());
+            pessoaDTO.setFormaPagamento(metodoPagamento);
+            PessoaDTO savedPessoa = pessoaService.save(pessoaDTO);
+            return new ResponseEntity<>(savedPessoa, HttpStatus.CREATED);
+        }
+        catch (FormaPagamentoInvalidaException e) {
+            ErrorResponse errorResponse = new ErrorResponse(e.getTimestamp(), e.getStatus(), e.getError(), e.getMessage());
+            return ResponseEntity.status(e.getStatus()).body(errorResponse);
+        }
+
     }
 
     @PutMapping("/{id}")
@@ -64,18 +76,20 @@ public class PessoaController {
     }
 
     @PostMapping("/{id}/forma-pagamento")
-    public ResponseEntity<PessoaDTO> definirFormaPagamento(@PathVariable String id,
-                                                           @RequestBody Map<String, String> payload) {
-        String formaPagamentoStr = payload.get("formaPagamento");
-
-        if (formaPagamentoStr == null || EnumPagamento.valueOf(formaPagamentoStr) == null) {
-            throw new FormaPagamentoInvalidaException("Forma de pagamento inválida");
+    @Operation(summary = "Cadastrar metodo de pagamento por Id", method = "POST")
+    public ResponseEntity<Object> definirFormaPagamento(@PathVariable String id,
+                                                        @RequestParam @Valid String formaPagamento) {
+        try {
+            if (!EnumPagamento.contains(formaPagamento)) {
+                throw new FormaPagamentoInvalidaException("Método de Pagamento Inválido");
+            }
+            EnumPagamento metodoPagamento = EnumPagamento.valueOf(formaPagamento.toUpperCase());
+            PessoaDTO pessoaDTO = pessoaService.definirFormaPagamento(id, metodoPagamento);
+            return ResponseEntity.ok(pessoaDTO);
+        } catch (FormaPagamentoInvalidaException e) {
+            return ResponseEntity.status(e.getStatus()).body(new ErrorResponse(e.getTimestamp(), e.getStatus(), e.getError(), e.getMessage()));
         }
 
-        EnumPagamento formaPagamento = EnumPagamento.valueOf(formaPagamentoStr);
-        PessoaDTO pessoaDTO = pessoaService.definirFormaPagamento(id, formaPagamento);
-
-        return ResponseEntity.ok(pessoaDTO);
     }
 
 }

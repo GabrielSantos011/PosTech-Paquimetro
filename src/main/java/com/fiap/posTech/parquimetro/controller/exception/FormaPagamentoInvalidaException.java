@@ -1,7 +1,9 @@
 package com.fiap.posTech.parquimetro.controller.exception;
 
-public class FormaPagamentoInvalidaException extends RuntimeException{
+import org.springframework.http.HttpStatus;
+
+public class FormaPagamentoInvalidaException extends CustomException{
     public FormaPagamentoInvalidaException(String message) {
-        super(message);
+        super(message, HttpStatus.BAD_REQUEST.value(), "Bad Request");
     }
 }

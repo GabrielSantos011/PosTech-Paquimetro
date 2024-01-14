@@ -1,6 +1,5 @@
 package com.fiap.posTech.parquimetro.controller.exception;
 
-import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -21,17 +20,10 @@ public class CustomExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
     }
 
-    @ExceptionHandler(OptimisticLockingFailureException.class)
-    public ResponseEntity<String> handleOptimisticLockingFailureException(
-            OptimisticLockingFailureException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body("Erro de concorrência: O objeto foi atualizado por outro usuário." +
-                "Por favor, tente novamente!");
-    }
-
-    @ExceptionHandler(FormaPagamentoInvalidaException.class)
-    public ResponseEntity<String> handleFormaPagamentoInvalidaException(
-            FormaPagamentoInvalidaException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<ErrorResponse> handleCustomException(CustomException e) {
+        ErrorResponse errorResponse = new ErrorResponse(e.getTimestamp(), e.getStatus(), e.getError(), e.getMessage());
+        return ResponseEntity.status(e.getStatus()).body(errorResponse);
     }
 
 }
