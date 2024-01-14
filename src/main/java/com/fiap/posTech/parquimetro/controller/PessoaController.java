@@ -1,10 +1,11 @@
 package com.fiap.posTech.parquimetro.controller;
 
+import com.fiap.posTech.parquimetro.controller.exception.FormaPagamentoInvalidaException;
 import com.fiap.posTech.parquimetro.dto.PessoaDTO;
+import com.fiap.posTech.parquimetro.model.EnumPagamento;
 import com.fiap.posTech.parquimetro.service.PessoaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.tags.Tags;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -13,6 +14,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/pessoas", produces = {"application/json"})
@@ -31,10 +34,10 @@ public class PessoaController {
         return ResponseEntity.ok(pessoas);
     }
 
-    @GetMapping("/{codigo}")
+    @GetMapping("/{id}")
     @Operation(summary = "Procurar pessoa por Id", method = "GET")
-    public ResponseEntity<PessoaDTO> findById(@PathVariable String codigo) {
-        var pessoa = pessoaService.findById(codigo);
+    public ResponseEntity<PessoaDTO> findById(@PathVariable String id) {
+        var pessoa = pessoaService.findById(id);
         return ResponseEntity.ok(pessoa);
     }
 
@@ -45,18 +48,34 @@ public class PessoaController {
         return new ResponseEntity<>(savedPessoa, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{codigo}")
+    @PutMapping("/{id}")
     @Operation(summary = "Alterar uma pessoa já cadastrada por Id", method = "PUT")
-    public ResponseEntity<PessoaDTO> update(@PathVariable String codigo,
+    public ResponseEntity<PessoaDTO> update(@PathVariable String id,
                                             @Valid @RequestBody PessoaDTO pessoaDTO) {
-        PessoaDTO userUpdate = pessoaService.update(codigo, pessoaDTO);
+        PessoaDTO userUpdate = pessoaService.update(id, pessoaDTO);
         return ResponseEntity.ok().body(userUpdate);
     }
 
-    @DeleteMapping("/{codigo}")
+    @DeleteMapping("/{id}")
     @Operation(summary = "Excluir uma pessoa já cadastrada por Id", method = "DELETE")
-    public ResponseEntity<Void> delete(@PathVariable String codigo) {
-        pessoaService.delete(codigo);
+    public ResponseEntity<Void> delete(@PathVariable String id) {
+        pessoaService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/{id}/forma-pagamento")
+    public ResponseEntity<PessoaDTO> definirFormaPagamento(@PathVariable String id,
+                                                           @RequestBody Map<String, String> payload) {
+        String formaPagamentoStr = payload.get("formaPagamento");
+
+        if (formaPagamentoStr == null || EnumPagamento.valueOf(formaPagamentoStr) == null) {
+            throw new FormaPagamentoInvalidaException("Forma de pagamento inválida");
+        }
+
+        EnumPagamento formaPagamento = EnumPagamento.valueOf(formaPagamentoStr);
+        PessoaDTO pessoaDTO = pessoaService.definirFormaPagamento(id, formaPagamento);
+
+        return ResponseEntity.ok(pessoaDTO);
+    }
+
 }

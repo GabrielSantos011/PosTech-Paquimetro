@@ -28,4 +28,10 @@ public class CustomExceptionHandler {
                 "Por favor, tente novamente!");
     }
 
+    @ExceptionHandler(FormaPagamentoInvalidaException.class)
+    public ResponseEntity<String> handleFormaPagamentoInvalidaException(
+            FormaPagamentoInvalidaException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
 }

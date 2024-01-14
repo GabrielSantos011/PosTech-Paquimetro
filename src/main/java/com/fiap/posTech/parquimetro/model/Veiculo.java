@@ -1,16 +1,17 @@
 package com.fiap.posTech.parquimetro.model;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Version;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
-
-import java.time.Year;
 
 @Document("veiculo")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Veiculo {
@@ -23,6 +24,9 @@ public class Veiculo {
     private String anoFabrica;
     private String anoModelo;
     private String placa;
+
+    @DBRef
+    private Pessoa pessoa;
 
     @Version
     private Long version;

@@ -1,6 +1,7 @@
 package com.fiap.posTech.parquimetro.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fiap.posTech.parquimetro.model.EnumPagamento;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -15,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PessoaDTO {
-        String codigo;
+        String id;
         @NotBlank(message = "O nome não pode estar em branco.")
         String nome;
         @Email(message = "E-mail inválido.")
@@ -29,4 +30,6 @@ public class PessoaDTO {
         EnderecoDTO enderecoDTO;
         @JsonProperty("veiculos")
         List<VeiculoDTO> veiculosDTO;
+
+        private EnumPagamento formaPagamento;
 }

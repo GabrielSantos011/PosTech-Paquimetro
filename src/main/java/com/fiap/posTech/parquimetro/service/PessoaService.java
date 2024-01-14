@@ -1,12 +1,11 @@
 package com.fiap.posTech.parquimetro.service;
 
 import com.fiap.posTech.parquimetro.controller.exception.ControllerNotFoundException;
+import com.fiap.posTech.parquimetro.controller.exception.FormaPagamentoInvalidaException;
 import com.fiap.posTech.parquimetro.dto.EnderecoDTO;
 import com.fiap.posTech.parquimetro.dto.PessoaDTO;
 import com.fiap.posTech.parquimetro.dto.VeiculoDTO;
-import com.fiap.posTech.parquimetro.model.Endereco;
-import com.fiap.posTech.parquimetro.model.Pessoa;
-import com.fiap.posTech.parquimetro.model.Veiculo;
+import com.fiap.posTech.parquimetro.model.*;
 import com.fiap.posTech.parquimetro.repository.EnderecoRepository;
 import com.fiap.posTech.parquimetro.repository.PessoaRepository;
 import com.fiap.posTech.parquimetro.repository.VeiculoRepository;
@@ -16,13 +15,13 @@ import org.modelmapper.ModelMapper;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +33,6 @@ public class PessoaService {
     private final EnderecoRepository enderecoRepository;
     private final VeiculoRepository veiculoRepository;
     private final ModelMapper modelMapper;
-    private final MongoTemplate mongoTemplate;
 
     @ExceptionHandler(OptimisticLockingFailureException.class)
     public ResponseEntity<String> handleOptimistcLockingFaulureException(
@@ -86,7 +84,9 @@ public class PessoaService {
             pessoa.setCelular(pessoaDTO.getCelular());
             pessoa.setDataNascimento(pessoaDTO.getDataNascimento());
 
-            updateEndereco(pessoaDTO.getEnderecoDTO(), pessoa);
+            if (pessoaDTO.getEnderecoDTO() != null) {
+                updateEndereco(pessoa.getEndereco(), pessoaDTO.getEnderecoDTO());
+            }
 
             List<VeiculoDTO> veiculosDTO = pessoaDTO.getVeiculosDTO();
             List<Veiculo> veiculos = new ArrayList<>();
@@ -127,6 +127,43 @@ public class PessoaService {
         pessoaRepository.deleteById(codigo);
     }
 
+    @Transactional
+    public PessoaDTO pagarEstacionamento(String pessoaId, double valor) {
+        Pessoa pessoa = pessoaRepository.findById(pessoaId)
+                .orElseThrow(() -> new ControllerNotFoundException("Usuário não encontrado"));
+
+        EnumPagamento formaPagamento = pessoa.getFormaPagamento();
+
+        if (formaPagamento == null) {
+            throw new FormaPagamentoInvalidaException("Forma de Pagamento não registrada para o usuário");
+        }
+
+        Pagamento pagamento = new Pagamento();
+        pagamento.setDataPagamento(LocalDateTime.now());
+        pagamento.setValor(valor);
+        pagamento.setTipoPagamento(formaPagamento);
+        pagamento.setPessoa(pessoa);
+
+        pessoa.adicionarPagamento(pagamento);
+
+        pessoa = pessoaRepository.save(pessoa);
+
+        return toPessoaDTO(pessoa);
+    }
+
+    @Transactional
+    public PessoaDTO definirFormaPagamento(String pessoaId, EnumPagamento formaPagamento) {
+        Pessoa pessoa = pessoaRepository.findById(pessoaId)
+                .orElseThrow(() -> new ControllerNotFoundException("Usuário não encontrado"));
+
+        pessoa.definirFormaPagamento(formaPagamento);
+
+        pessoa = pessoaRepository.save(pessoa);
+
+        return toPessoaDTO(pessoa);
+    }
+
+
     private PessoaDTO toPessoaDTO(Pessoa pessoa) {
         return modelMapper.map(pessoa, PessoaDTO.class);
     }
@@ -142,9 +179,8 @@ public class PessoaService {
         return modelMapper.map(veiculoDTO, Veiculo.class);
     }
 
-    private void updateEndereco(EnderecoDTO enderecoDTO, Pessoa pessoa) {
-        if (enderecoDTO != null) {
-            Endereco endereco = pessoa.getEndereco();
+    private void updateEndereco(Endereco endereco, EnderecoDTO enderecoDTO) {
+
             endereco.setTipoLogradouro(enderecoDTO.getTipoLogradouro());
             endereco.setLogradouro(enderecoDTO.getLogradouro());
             endereco.setNumero(enderecoDTO.getNumero());
@@ -155,6 +191,5 @@ public class PessoaService {
             endereco.setCep(enderecoDTO.getCep());
 
             enderecoRepository.save(endereco);
-        }
     }
 }

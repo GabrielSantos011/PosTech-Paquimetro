@@ -1,24 +1,30 @@
 package com.fiap.posTech.parquimetro.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Singular;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Document("pessoa")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Pessoa {
+
     @Id
-    private String codigo;
+    private String id;
     private String cpf;
     private String rg;
     private String nome;
@@ -29,11 +35,29 @@ public class Pessoa {
     @DBRef
     private Endereco endereco;
 
-    @Singular
     @DBRef
     private List<Veiculo> veiculos;
 
+    @DBRef
+    private List<Pagamento> pagamentos;
+
     @Version
     private Long version;
+
+    @Column(name = "forma_pagamento")
+    @Enumerated(EnumType.STRING)
+    private EnumPagamento formaPagamento;
+
+    public void definirFormaPagamento(EnumPagamento formaPagamento) {
+        this.formaPagamento = formaPagamento;
+    }
+
+    public void adicionarPagamento(Pagamento pagamento) {
+        if (pagamentos == null) {
+            pagamentos = new ArrayList<>();
+        }
+        pagamentos.add(pagamento);
+    }
+
 
 }

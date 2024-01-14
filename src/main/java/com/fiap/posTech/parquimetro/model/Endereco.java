@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Version;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document("endereco")
@@ -13,7 +14,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 public class Endereco {
     @Id
-    private String codigo;
+    private String id;
     private String cep;
     private String tipoLogradouro; //Trabalho, Home, etc
     private String logradouro;
@@ -22,6 +23,9 @@ public class Endereco {
     private String bairro;
     private String cidade;
     private String uf;
+
+    @DBRef
+    private Pessoa pessoa;
 
     @Version
     private Long version;
