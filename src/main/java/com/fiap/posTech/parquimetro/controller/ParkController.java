@@ -7,11 +7,12 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
+import java.util.List;
 
 
 @RestController
@@ -44,5 +45,9 @@ public class ParkController {
         return ResponseEntity.ok().body(list);
     }
 
+    @GetMapping("/ativos")
+    public ResponseEntity<List<Page<Park>>> getParksAtivos(Pageable pageable) {
+        return ResponseEntity.ok(service.getParksAtivos(pageable));
+    }
 
 }

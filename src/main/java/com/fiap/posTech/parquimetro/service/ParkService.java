@@ -10,7 +10,6 @@ import com.fiap.posTech.parquimetro.repository.EnderecoRepository;
 import com.fiap.posTech.parquimetro.repository.ParkRepository;
 import com.fiap.posTech.parquimetro.repository.PessoaRepository;
 import com.fiap.posTech.parquimetro.repository.VeiculoRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +23,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -62,6 +62,8 @@ public class ParkService {
             LocalDateTime now = LocalDateTime.now();
             park.setEntrada(now);
 
+            park.setAtiva(true);
+
             parkRepository.save(park);
 
             return new ResponseEntity<>(mensagem.TrataMensagemErro("Parking cadastrado com sucesso."),
@@ -87,6 +89,7 @@ public class ParkService {
             var tempo = lt.format(DateTimeFormatter.ofPattern("HH:mm"));
             park.setSaida(now);
             park.setPermanencia(tempo);
+            park.setAtiva(false);
 
             //parkRepository.save(park);
 
@@ -107,6 +110,9 @@ public class ParkService {
         return this.parkRepository.findAll(lista);
     }
 
+    public List<Page<Park>> getParksAtivos(Pageable pageable) {
+        return parkRepository.findAllByAtivaIsTrue(pageable);
+    }
 
     private void cadastraEndereco(Endereco enderecoEstacionado) {
         Endereco end = new Endereco();
