@@ -1,6 +1,5 @@
 package com.fiap.posTech.parquimetro.controller;
 
-import com.fiap.posTech.parquimetro.controller.exception.ErrorResponse;
 import com.fiap.posTech.parquimetro.controller.exception.FormaPagamentoInvalidaException;
 import com.fiap.posTech.parquimetro.model.EnumPagamento;
 import com.fiap.posTech.parquimetro.model.Pessoa;
@@ -15,6 +14,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+
 
 @RestController
 @RequestMapping(value = "/pessoas", produces = {"application/json"})
@@ -54,10 +55,9 @@ public class PessoaController {
             return new ResponseEntity<>(savedPessoa, HttpStatus.CREATED);
         }
         catch (FormaPagamentoInvalidaException e) {
-            ErrorResponse errorResponse = new ErrorResponse(e.getTimestamp(), e.getStatus(), e.getError(), e.getMessage());
-            return ResponseEntity.status(e.getStatus()).body(errorResponse);
+            //ErrorResponse errorResponse = new ErrorResponse(e.getTimestamp(), e.getStatus(), e.getError(), e.getMessage());
+            return ResponseEntity.status(e.getStatus()).body(e.getMessage());
         }
-
     }
 
     @PutMapping("/{id}")
@@ -87,7 +87,8 @@ public class PessoaController {
             Pessoa pessoa = pessoaService.definirFormaPagamento(id, metodoPagamento);
             return ResponseEntity.ok(pessoa);
         } catch (FormaPagamentoInvalidaException e) {
-            return ResponseEntity.status(e.getStatus()).body(new ErrorResponse(e.getTimestamp(), e.getStatus(), e.getError(), e.getMessage()));
+//            return ResponseEntity.status(e.getStatus()).body(new ErrorResponse(e.getTimestamp(), e.getStatus(), e.getError(), e.getMessage()));
+            return ResponseEntity.status(e.getStatus()).body(e.getMessage());
         }
 
     }
