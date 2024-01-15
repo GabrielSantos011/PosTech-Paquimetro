@@ -1,5 +1,6 @@
 package com.fiap.posTech.parquimetro.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,9 +26,11 @@ public class Veiculo {
     private String anoModelo;
     private String placa;
 
+    @JsonIgnore
     @DBRef
     private Pessoa pessoa;
 
+    @JsonIgnore
     @Version
     private Long version;
 

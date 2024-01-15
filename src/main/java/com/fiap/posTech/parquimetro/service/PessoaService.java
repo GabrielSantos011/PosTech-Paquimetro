@@ -3,16 +3,12 @@ package com.fiap.posTech.parquimetro.service;
 import com.fiap.posTech.parquimetro.controller.exception.ControllerNotFoundException;
 import com.fiap.posTech.parquimetro.controller.exception.CustomException;
 import com.fiap.posTech.parquimetro.controller.exception.FormaPagamentoInvalidaException;
-import com.fiap.posTech.parquimetro.dto.EnderecoDTO;
-import com.fiap.posTech.parquimetro.dto.PessoaDTO;
-import com.fiap.posTech.parquimetro.dto.VeiculoDTO;
 import com.fiap.posTech.parquimetro.model.*;
 import com.fiap.posTech.parquimetro.repository.EnderecoRepository;
 import com.fiap.posTech.parquimetro.repository.PessoaRepository;
 import com.fiap.posTech.parquimetro.repository.VeiculoRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,7 +29,6 @@ public class PessoaService {
     private final PessoaRepository pessoaRepository;
     private final EnderecoRepository enderecoRepository;
     private final VeiculoRepository veiculoRepository;
-    private final ModelMapper modelMapper;
 
     @ExceptionHandler(OptimisticLockingFailureException.class)
     public ResponseEntity<String> handleOptimistcLockingFaulureException(
@@ -42,14 +37,13 @@ public class PessoaService {
                 body("Erro de concorrência: A Pessoa foi atualizado por outro usuario");
     }
 
-    public Page<PessoaDTO> findAll(Pageable pageable) {
-        return pessoaRepository.findAll(pageable).map(this::toPessoaDTO);
+    public Page<Pessoa> findAll(Pageable pageable) {
+        return pessoaRepository.findAll(pageable);
     }
     @Transactional
-    public PessoaDTO findById(String id) {
+    public Pessoa findById(String id) {
         try {
-            Pessoa pessoa = pessoaRepository.findById(id).orElseThrow(() -> new ControllerNotFoundException("Usuário não encontrado"));
-            return toPessoaDTO(pessoa);
+            return pessoaRepository.findById(id).orElseThrow(() -> new ControllerNotFoundException("Usuário não encontrado"));
         } catch (ControllerNotFoundException e) {
             throw e;
         } catch (Exception e) {
@@ -57,77 +51,44 @@ public class PessoaService {
         }
     }
     @Transactional
-    public PessoaDTO save(PessoaDTO pessoaDTO) {
-        Pessoa pessoa = toPessoa(pessoaDTO);
-        if (pessoaDTO.getEnderecoDTO() != null) {
-            Endereco endereco = toEndereco(pessoaDTO.getEnderecoDTO());
-            enderecoRepository.save(endereco);
-            pessoa.setEndereco(endereco);
+    public Pessoa save(Pessoa pessoa) {
+        if (pessoa.getEndereco() != null) {
+            enderecoRepository.save(pessoa.getEndereco());
         }
 
-        List<VeiculoDTO> veiculosDTO = pessoaDTO.getVeiculosDTO();
-        List<Veiculo> veiculos = new ArrayList<>();
-
-        if (veiculosDTO != null && !veiculosDTO.isEmpty()) {
-            for (VeiculoDTO veiculoDTO : veiculosDTO) {
-                Veiculo veiculo = toVeiculo(veiculoDTO);
-                veiculoRepository.save(veiculo);
-                veiculos.add(veiculo);
-            }
-            pessoa.setVeiculos(veiculos);
+        List<Veiculo> veiculos = pessoa.getVeiculos();
+        if (veiculos != null && !veiculos.isEmpty()) {
+            veiculos.forEach(veiculoRepository::save);
         }
-        pessoa = pessoaRepository.save(pessoa);
-        return toPessoaDTO(pessoa);
+
+        return pessoaRepository.save(pessoa);
     }
     @Transactional
-    public PessoaDTO update(String id, PessoaDTO pessoaDTO) {
+    public Pessoa update(String id, Pessoa updatedPessoa) {
         try {
             Pessoa pessoa = pessoaRepository.findById(id)
-                    .orElseThrow(() -> new ControllerNotFoundException("Usuario não encontrado"));
-            pessoa.setNome(pessoaDTO.getNome());
-            pessoa.setEmail(pessoaDTO.getEmail());
-            pessoa.setCpf(pessoaDTO.getCpf());
-            pessoa.setRg(pessoaDTO.getRg());
-            pessoa.setCelular(pessoaDTO.getCelular());
-            pessoa.setDataNascimento(pessoaDTO.getDataNascimento());
+                    .orElseThrow(() -> new ControllerNotFoundException("Usuário não encontrado"));
 
-            if (pessoaDTO.getEnderecoDTO() != null) {
-                updateEndereco(pessoa.getEndereco(), pessoaDTO.getEnderecoDTO());
+            pessoa.setNome(updatedPessoa.getNome());
+            pessoa.setEmail(updatedPessoa.getEmail());
+            pessoa.setCpf(updatedPessoa.getCpf());
+            pessoa.setRg(updatedPessoa.getRg());
+            pessoa.setCelular(updatedPessoa.getCelular());
+            pessoa.setDataNascimento(updatedPessoa.getDataNascimento());
+
+            if (updatedPessoa.getEndereco() != null) {
+                updateEndereco(pessoa.getEndereco(), updatedPessoa.getEndereco());
             }
 
-            List<VeiculoDTO> veiculosDTO = pessoaDTO.getVeiculosDTO();
-            List<Veiculo> veiculos = new ArrayList<>();
-
-            if (veiculosDTO != null && !veiculosDTO.isEmpty()) {
-                for (VeiculoDTO veiculoDTO : veiculosDTO) {
-                    Veiculo veiculo = pessoa.getVeiculos()
-                            .stream()
-                            .filter(v -> v.getId().equals(veiculoDTO.getId()))
-                            .findFirst()
-                            .orElse(null);
-
-                    if (veiculo != null) {
-                        veiculo.setModelo(veiculoDTO.getModelo());
-                        veiculo.setCor(veiculoDTO.getCor());
-                        veiculo.setAnoFabrica(veiculoDTO.getAnoFabrica());
-                        veiculo.setAnoModelo(veiculoDTO.getAnoModelo());
-                        veiculo.setPlaca(veiculoDTO.getPlaca());
-                        veiculoRepository.save(veiculo);
-                    } else {
-                        Veiculo novoVeiculo = toVeiculo(veiculoDTO);
-                        veiculoRepository.save(novoVeiculo);
-                        veiculos.add(novoVeiculo);
-                    }
-                }
-                pessoa.setVeiculos(veiculos);
+            List<Veiculo> veiculos = updatedPessoa.getVeiculos();
+            if (veiculos != null && !veiculos.isEmpty()) {
+                updateVeiculos(pessoa, veiculos);
             }
 
-            pessoa = pessoaRepository.save(pessoa);
-            return toPessoaDTO(pessoa);
+            return pessoaRepository.save(pessoa);
         } catch (EntityNotFoundException e) {
-            throw new ControllerNotFoundException("Usuario com id:" + id + " não encontrado");
+            throw new ControllerNotFoundException("Usuário com id:" + id + " não encontrado");
         }
-
     }
     @Transactional
     public void delete(String id) {
@@ -135,7 +96,7 @@ public class PessoaService {
     }
 
     @Transactional
-    public PessoaDTO pagarEstacionamento(String pessoaId, double valor) {
+    public Pessoa pagarEstacionamento(String pessoaId, double valor) {
         Pessoa pessoa = pessoaRepository.findById(pessoaId)
                 .orElseThrow(() -> new ControllerNotFoundException("Usuário não encontrado"));
 
@@ -155,11 +116,11 @@ public class PessoaService {
 
         pessoa = pessoaRepository.save(pessoa);
 
-        return toPessoaDTO(pessoa);
+        return pessoa;
     }
 
     @Transactional
-    public PessoaDTO definirFormaPagamento(String pessoaId, EnumPagamento formaPagamento) {
+    public Pessoa definirFormaPagamento(String pessoaId, EnumPagamento formaPagamento) {
         Pessoa pessoa = pessoaRepository.findById(pessoaId)
                 .orElseThrow(() -> new ControllerNotFoundException("Usuário não encontrado"));
 
@@ -167,36 +128,51 @@ public class PessoaService {
 
         pessoa = pessoaRepository.save(pessoa);
 
-        return toPessoaDTO(pessoa);
+        return pessoa;
     }
 
+    private void updateEndereco(Endereco endereco, Endereco updatedEndereco) {
+        endereco.setTipoLogradouro(updatedEndereco.getTipoLogradouro());
+        endereco.setLogradouro(updatedEndereco.getLogradouro());
+        endereco.setNumero(updatedEndereco.getNumero());
+        endereco.setComplemento(updatedEndereco.getComplemento());
+        endereco.setBairro(updatedEndereco.getBairro());
+        endereco.setCidade(updatedEndereco.getCidade());
+        endereco.setUf(updatedEndereco.getUf());
+        endereco.setCep(updatedEndereco.getCep());
 
-    private PessoaDTO toPessoaDTO(Pessoa pessoa) {
-        return modelMapper.map(pessoa, PessoaDTO.class);
+        enderecoRepository.save(endereco);
     }
 
-    private Pessoa toPessoa(PessoaDTO pessoaDTO) {
-        return modelMapper.map(pessoaDTO, Pessoa.class);
-    }
-    private Endereco toEndereco(EnderecoDTO enderecoDTO) {
-        return modelMapper.map(enderecoDTO, Endereco.class);
-    }
+    private void updateVeiculos(Pessoa pessoa, List<Veiculo> updatedVeiculos) {
+        List<Veiculo> veiculos = new ArrayList<>();
 
-    private Veiculo toVeiculo(VeiculoDTO veiculoDTO) {
-        return modelMapper.map(veiculoDTO, Veiculo.class);
-    }
+        for (Veiculo updatedVeiculo : updatedVeiculos) {
+            Veiculo veiculo = pessoa.getVeiculos()
+                    .stream()
+                    .filter(v -> v.getId().equals(updatedVeiculo.getId()))
+                    .findFirst()
+                    .orElse(null);
 
-    private void updateEndereco(Endereco endereco, EnderecoDTO enderecoDTO) {
+            if (veiculo != null) {
+                veiculo.setModelo(updatedVeiculo.getModelo());
+                veiculo.setCor(updatedVeiculo.getCor());
+                veiculo.setAnoFabrica(updatedVeiculo.getAnoFabrica());
+                veiculo.setAnoModelo(updatedVeiculo.getAnoModelo());
+                veiculo.setPlaca(updatedVeiculo.getPlaca());
+                veiculoRepository.save(veiculo);
+            } else {
+                Veiculo novoVeiculo = new Veiculo();
+                novoVeiculo.setModelo(updatedVeiculo.getModelo());
+                novoVeiculo.setCor(updatedVeiculo.getCor());
+                novoVeiculo.setAnoFabrica(updatedVeiculo.getAnoFabrica());
+                novoVeiculo.setAnoModelo(updatedVeiculo.getAnoModelo());
+                novoVeiculo.setPlaca(updatedVeiculo.getPlaca());
+                veiculoRepository.save(novoVeiculo);
+                veiculos.add(novoVeiculo);
+            }
+        }
 
-            endereco.setTipoLogradouro(enderecoDTO.getTipoLogradouro());
-            endereco.setLogradouro(enderecoDTO.getLogradouro());
-            endereco.setNumero(enderecoDTO.getNumero());
-            endereco.setComplemento(enderecoDTO.getComplemento());
-            endereco.setBairro(enderecoDTO.getBairro());
-            endereco.setCidade(enderecoDTO.getCidade());
-            endereco.setUf(enderecoDTO.getUf());
-            endereco.setCep(enderecoDTO.getCep());
-
-            enderecoRepository.save(endereco);
+        pessoa.setVeiculos(veiculos);
     }
 }

@@ -1,12 +1,17 @@
 package com.fiap.posTech.parquimetro.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.br.CPF;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -25,12 +30,20 @@ public class Pessoa {
 
     @Id
     private String id;
-    private String cpf;
-    private String rg;
+    @NotBlank(message = "O nome não pode estar em branco.")
     private String nome;
-    private LocalDate dataNascimento;
+    @Email(message = "E-mail inválido.")
     private String email;
+    @CPF(message = "CPF inválido.")
+    private String cpf;
+    @Size(min = 9, max = 9, message = "RG deve ter exatamente 9 caracteres.")
+    private String rg;
     private String celular;
+    private LocalDate dataNascimento;
+
+    @Column(name = "forma_pagamento")
+    @Enumerated(EnumType.STRING)
+    private EnumPagamento formaPagamento;
 
     @DBRef
     private Endereco endereco;
@@ -38,15 +51,13 @@ public class Pessoa {
     @DBRef
     private List<Veiculo> veiculos;
 
+    @JsonIgnore
     @DBRef
     private List<Pagamento> pagamentos;
 
+    @JsonIgnore
     @Version
     private Long version;
-
-    @Column(name = "forma_pagamento")
-    @Enumerated(EnumType.STRING)
-    private EnumPagamento formaPagamento;
 
     public void definirFormaPagamento(EnumPagamento formaPagamento) {
         this.formaPagamento = formaPagamento;
@@ -58,6 +69,5 @@ public class Pessoa {
         }
         pagamentos.add(pagamento);
     }
-
 
 }
