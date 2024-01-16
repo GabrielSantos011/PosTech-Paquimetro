@@ -91,7 +91,7 @@ public class ParkService {
             park.setPermanencia(tempo);
             park.setAtiva(false);
 
-            //parkRepository.save(park);
+            parkRepository.save(park);
 
             return new ResponseEntity<>(park,
                     HttpStatus.OK);

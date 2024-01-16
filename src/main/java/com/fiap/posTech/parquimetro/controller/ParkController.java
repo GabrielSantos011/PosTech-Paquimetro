@@ -16,16 +16,22 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping(value = "/parking", produces = {"application/json"})
+@RequestMapping(value = "/park", produces = {"application/json"})
 @Tag(name = "Cadastro de Parking", description = "CRUD de Parking")
 public class ParkController {
     @Autowired
     private ParkService service;
 
 
-    @PostMapping
+    @PostMapping(value = "/parking")
     public ResponseEntity<?> parking(@Valid @RequestBody Park parking) {
         return this.service.checkin(parking);
+    }
+
+    @PutMapping(value = "/unparking/{id}")
+    public ResponseEntity<?> unparking(@PathVariable String id) {
+        var unparking = service.checkout(id);
+        return ResponseEntity.ok(unparking);
     }
 
     @PutMapping("/{id}")
