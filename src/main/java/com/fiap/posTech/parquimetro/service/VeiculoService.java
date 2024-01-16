@@ -2,7 +2,7 @@ package com.fiap.posTech.parquimetro.service;
 
 import com.fiap.posTech.parquimetro.controller.exception.ControllerNotFoundException;
 import com.fiap.posTech.parquimetro.controller.exception.CustomException;
-import com.fiap.posTech.parquimetro.model.*;
+import com.fiap.posTech.parquimetro.model.Veiculo;
 import com.fiap.posTech.parquimetro.repository.VeiculoRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;

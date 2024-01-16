@@ -2,7 +2,7 @@ package com.fiap.posTech.parquimetro.service;
 
 import com.fiap.posTech.parquimetro.controller.exception.ControllerNotFoundException;
 import com.fiap.posTech.parquimetro.controller.exception.CustomException;
-import com.fiap.posTech.parquimetro.controller.exception.FormaPagamentoInvalidaException;
+import com.fiap.posTech.parquimetro.controller.exception.ParkingException;
 import com.fiap.posTech.parquimetro.model.*;
 import com.fiap.posTech.parquimetro.repository.EnderecoRepository;
 import com.fiap.posTech.parquimetro.repository.PessoaRepository;
@@ -103,7 +103,7 @@ public class PessoaService {
         EnumPagamento formaPagamento = pessoa.getFormaPagamento();
 
         if (formaPagamento == null) {
-            throw new FormaPagamentoInvalidaException("Forma de Pagamento não registrada para o usuário");
+            throw new ParkingException("Forma de Pagamento não registrada para o usuário");
         }
 
         Pagamento pagamento = new Pagamento();

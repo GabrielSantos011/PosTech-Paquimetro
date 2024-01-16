@@ -1,6 +1,6 @@
 package com.fiap.posTech.parquimetro.controller;
 
-import com.fiap.posTech.parquimetro.controller.exception.FormaPagamentoInvalidaException;
+import com.fiap.posTech.parquimetro.controller.exception.ParkingException;
 import com.fiap.posTech.parquimetro.model.EnumPagamento;
 import com.fiap.posTech.parquimetro.model.Pessoa;
 import com.fiap.posTech.parquimetro.service.PessoaService;
@@ -47,14 +47,14 @@ public class PessoaController {
                                           @RequestParam String formaPagamento) {
         try {
             if (!EnumPagamento.contains(formaPagamento)) {
-                throw new FormaPagamentoInvalidaException("Método de Pagamento Inválido");
+                throw new ParkingException("Método de Pagamento Inválido");
             }
             EnumPagamento metodoPagamento = EnumPagamento.valueOf(formaPagamento.toUpperCase());
             pessoa.setFormaPagamento(metodoPagamento);
             Pessoa savedPessoa = pessoaService.save(pessoa);
             return new ResponseEntity<>(savedPessoa, HttpStatus.CREATED);
         }
-        catch (FormaPagamentoInvalidaException e) {
+        catch (ParkingException e) {
             //ErrorResponse errorResponse = new ErrorResponse(e.getTimestamp(), e.getStatus(), e.getError(), e.getMessage());
             return ResponseEntity.status(e.getStatus()).body(e.getMessage());
         }
@@ -81,12 +81,12 @@ public class PessoaController {
                                                         @RequestParam @Valid String formaPagamento) {
         try {
             if (!EnumPagamento.contains(formaPagamento)) {
-                throw new FormaPagamentoInvalidaException("Método de Pagamento Inválido");
+                throw new ParkingException("Método de Pagamento Inválido");
             }
             EnumPagamento metodoPagamento = EnumPagamento.valueOf(formaPagamento.toUpperCase());
             Pessoa pessoa = pessoaService.definirFormaPagamento(id, metodoPagamento);
             return ResponseEntity.ok(pessoa);
-        } catch (FormaPagamentoInvalidaException e) {
+        } catch (ParkingException e) {
 //            return ResponseEntity.status(e.getStatus()).body(new ErrorResponse(e.getTimestamp(), e.getStatus(), e.getError(), e.getMessage()));
             return ResponseEntity.status(e.getStatus()).body(e.getMessage());
         }

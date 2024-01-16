@@ -1,7 +1,10 @@
 package com.fiap.posTech.parquimetro.controller;
 
-import com.fiap.posTech.parquimetro.controller.exception.FormaPagamentoInvalidaException;
+import com.fiap.posTech.parquimetro.controller.exception.ControllerNotFoundException;
+import com.fiap.posTech.parquimetro.controller.exception.ParkingException;
+import com.fiap.posTech.parquimetro.model.Pessoa;
 import com.fiap.posTech.parquimetro.model.Veiculo;
+import com.fiap.posTech.parquimetro.service.PessoaService;
 import com.fiap.posTech.parquimetro.service.VeiculoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,6 +26,9 @@ public class VeiculoController {
     @Autowired
     private VeiculoService veiculoService;
 
+    @Autowired
+    private PessoaService pessoaService;
+
 
     @GetMapping
     @Operation(summary = "Obtem todos os veículos cadastradas", method = "GET")
@@ -41,12 +47,18 @@ public class VeiculoController {
 
     @PostMapping
     @Operation(summary = "Cadastrar um novo veículo", method = "POST")
-    public ResponseEntity<?> save(@Valid @RequestBody Veiculo veiculo) {
+    public ResponseEntity<?> save(@Valid @RequestBody Veiculo veiculo,
+                                  @RequestParam String pessoaId) {
         try {
+            Pessoa pessoa = pessoaService.findById(pessoaId);
+            pessoa.adicionarVeiculo(veiculo);
             Veiculo savedVeiculo = veiculoService.save(veiculo);
+            pessoaService.save(pessoa);
             return new ResponseEntity<>(savedVeiculo, HttpStatus.CREATED);
+        } catch (ControllerNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado");
         }
-        catch (FormaPagamentoInvalidaException e) {
+        catch (ParkingException e) {
             return ResponseEntity.status(e.getStatus()).body(e.getMessage());
         }
     }
