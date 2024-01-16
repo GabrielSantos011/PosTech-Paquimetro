@@ -10,6 +10,7 @@ import com.fiap.posTech.parquimetro.repository.EnderecoRepository;
 import com.fiap.posTech.parquimetro.repository.ParkRepository;
 import com.fiap.posTech.parquimetro.repository.PessoaRepository;
 import com.fiap.posTech.parquimetro.repository.VeiculoRepository;
+import com.fiap.posTech.parquimetro.service.CalculaPrecoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -59,12 +60,18 @@ public class ParkService {
             if (endereco == null) {
                 cadastraEndereco(park.getEnderecoEstacionado());
             }
+
             LocalDateTime now = LocalDateTime.now();
             park.setEntrada(now);
 
+            // Chama o serviço de cálculo de preço
+            CalculaPrecoService calculaPrecoService = new CalculaPrecoService();
+            double valorCobrado = calculaPrecoService.calcularPreco(park);
+
+            // Salva o registro no banco de dados
             parkRepository.save(park);
 
-            return new ResponseEntity<>(mensagem.TrataMensagemErro("Parking cadastrado com sucesso."),
+            return new ResponseEntity<>("Parking cadastrado com sucesso. Preço total: R$ " + valorCobrado,
                     HttpStatus.CREATED);
 
         } catch (Exception e) {
