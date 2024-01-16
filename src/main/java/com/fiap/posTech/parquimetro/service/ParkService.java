@@ -10,8 +10,10 @@ import com.fiap.posTech.parquimetro.repository.EnderecoRepository;
 import com.fiap.posTech.parquimetro.repository.ParkRepository;
 import com.fiap.posTech.parquimetro.repository.PessoaRepository;
 import com.fiap.posTech.parquimetro.repository.VeiculoRepository;
+
 import com.fiap.posTech.parquimetro.service.CalculaPrecoService;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +27,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -64,11 +67,16 @@ public class ParkService {
             LocalDateTime now = LocalDateTime.now();
             park.setEntrada(now);
 
+
             // Chama o serviço de cálculo de preço
             CalculaPrecoService calculaPrecoService = new CalculaPrecoService();
             double valorCobrado = calculaPrecoService.calcularPreco(park);
 
             // Salva o registro no banco de dados
+
+            park.setAtiva(true);
+
+
             parkRepository.save(park);
 
             return new ResponseEntity<>("Parking cadastrado com sucesso. Preço total: R$ " + valorCobrado,
@@ -94,8 +102,9 @@ public class ParkService {
             var tempo = lt.format(DateTimeFormatter.ofPattern("HH:mm"));
             park.setSaida(now);
             park.setPermanencia(tempo);
+            park.setAtiva(false);
 
-            //parkRepository.save(park);
+            parkRepository.save(park);
 
             return new ResponseEntity<>(park,
                     HttpStatus.OK);
@@ -114,6 +123,9 @@ public class ParkService {
         return this.parkRepository.findAll(lista);
     }
 
+    public List<Page<Park>> getParksAtivos(Pageable pageable) {
+        return parkRepository.findAllByAtivaIsTrue(pageable);
+    }
 
     private void cadastraEndereco(Endereco enderecoEstacionado) {
         Endereco end = new Endereco();

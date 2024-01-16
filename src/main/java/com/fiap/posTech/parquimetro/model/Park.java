@@ -28,6 +28,7 @@ public class Park {
     private double valorCobrado;
     private String tipoTempo; // Fixo ou Hora
     private String permanencia;
+    private Boolean ativa = false;
 
     @DBRef
     private Endereco enderecoEstacionado;

@@ -7,24 +7,31 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
+import java.util.List;
 
 
 @RestController
-@RequestMapping(value = "/parking", produces = {"application/json"})
+@RequestMapping(value = "/park", produces = {"application/json"})
 @Tag(name = "Cadastro de Parking", description = "CRUD de Parking")
 public class ParkController {
     @Autowired
     private ParkService service;
 
 
-    @PostMapping
+    @PostMapping(value = "/parking")
     public ResponseEntity<?> parking(@Valid @RequestBody Park parking) {
         return this.service.checkin(parking);
+    }
+
+    @PutMapping(value = "/unparking/{id}")
+    public ResponseEntity<?> unparking(@PathVariable String id) {
+        var unparking = service.checkout(id);
+        return ResponseEntity.ok(unparking);
     }
 
     @PutMapping("/{id}")
@@ -44,5 +51,9 @@ public class ParkController {
         return ResponseEntity.ok().body(list);
     }
 
+    @GetMapping("/ativos")
+    public ResponseEntity<List<Page<Park>>> getParksAtivos(Pageable pageable) {
+        return ResponseEntity.ok(service.getParksAtivos(pageable));
+    }
 
 }
