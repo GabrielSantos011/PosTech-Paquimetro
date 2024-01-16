@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
@@ -15,6 +17,9 @@ import java.time.LocalDateTime;
 public class CalculaPrecoService {
 
     private static final double PRECO_POR_HORA = 12.0;
+    public static double getPrecoPorHora() {
+        return PRECO_POR_HORA;
+    }
 
     @Autowired
     private ParkRepository parkRepository;
@@ -31,8 +36,12 @@ public class CalculaPrecoService {
 
             long diferencaEmMilissegundos = Duration.between(entradaLocalDateTime, saidaLocalDateTime).toMillis();
             double horas = diferencaEmMilissegundos / (60.0 * 60.0 * 1000.0);
-            double valorCobrado = horas * PRECO_POR_HORA;
+            double valorHora = getPrecoPorHora();
+            double valorCobrado = horas * getPrecoPorHora();
 
+            valorCobrado = arredondar(valorCobrado);
+
+            registro.setValorHora(valorHora);
             registro.setValorCobrado(valorCobrado);
 
             return valorCobrado;
@@ -41,6 +50,9 @@ public class CalculaPrecoService {
             e.printStackTrace();
             throw new RuntimeException("Erro ao calcular o preço.", e);
         }
+    }
+    private static double arredondar(double valorCobrado) {
+        return Math.round(valorCobrado * 100.0)/100.0;
     }
 }
 

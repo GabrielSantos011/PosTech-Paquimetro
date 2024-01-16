@@ -23,7 +23,7 @@ public class ParkController {
     private ParkService service;
 
 
-    @PostMapping(value = "/parking")
+    @PostMapping
     public ResponseEntity<?> parking(@Valid @RequestBody Park parking) {
         return this.service.checkin(parking);
     }

@@ -2,10 +2,7 @@ package com.fiap.posTech.parquimetro.service;
 
 import com.fiap.posTech.parquimetro.controller.exception.ControllerNotFoundException;
 import com.fiap.posTech.parquimetro.controller.exception.TrataMensagem;
-import com.fiap.posTech.parquimetro.model.Endereco;
-import com.fiap.posTech.parquimetro.model.Park;
-import com.fiap.posTech.parquimetro.model.Pessoa;
-import com.fiap.posTech.parquimetro.model.Veiculo;
+import com.fiap.posTech.parquimetro.model.*;
 import com.fiap.posTech.parquimetro.repository.EnderecoRepository;
 import com.fiap.posTech.parquimetro.repository.ParkRepository;
 import com.fiap.posTech.parquimetro.repository.PessoaRepository;
@@ -67,19 +64,18 @@ public class ParkService {
             LocalDateTime now = LocalDateTime.now();
             park.setEntrada(now);
 
-
             // Chama o serviço de cálculo de preço
             CalculaPrecoService calculaPrecoService = new CalculaPrecoService();
             double valorCobrado = calculaPrecoService.calcularPreco(park);
+            double valorHora = CalculaPrecoService.getPrecoPorHora();
 
             // Salva o registro no banco de dados
 
             park.setAtiva(true);
 
-
             parkRepository.save(park);
 
-            return new ResponseEntity<>("Parking cadastrado com sucesso. Preço total: R$ " + valorCobrado,
+            return new ResponseEntity<>("Parking cadastrado com sucesso. Valor da hora: R$ " + valorHora + " Preço total: R$ " + valorCobrado,
                     HttpStatus.CREATED);
 
         } catch (Exception e) {
