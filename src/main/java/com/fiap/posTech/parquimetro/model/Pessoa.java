@@ -59,6 +59,11 @@ public class Pessoa {
     @Version
     private Long version;
 
+    public void adicionarVeiculo(Veiculo veiculo) {
+        this.veiculos.add(veiculo);
+        veiculo.setPessoa(this);
+    }
+
     public void definirFormaPagamento(EnumPagamento formaPagamento) {
         this.formaPagamento = formaPagamento;
     }
