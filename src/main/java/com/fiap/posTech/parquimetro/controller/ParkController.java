@@ -45,7 +45,7 @@ public class ParkController {
             @RequestParam(value = "pagina", defaultValue = "0") Integer pagina,
             @RequestParam(value = "quantidade", defaultValue = "20") Integer quantidade,
             @RequestParam(value = "direcao", defaultValue = "ASC") String direcao,
-            @RequestParam(value = "ordenacao", defaultValue = "descricao") String ordenacao) {
+            @RequestParam(value = "ordenacao", defaultValue = "pessoa.nome") String ordenacao) {
         PageRequest pageRequest = PageRequest.of(pagina, quantidade, Sort.Direction.valueOf(direcao), ordenacao);
         var list = service.listaTodos(pageRequest);
         return ResponseEntity.ok().body(list);
