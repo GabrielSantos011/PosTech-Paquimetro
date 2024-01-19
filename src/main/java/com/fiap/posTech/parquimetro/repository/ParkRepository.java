@@ -14,5 +14,5 @@ public interface ParkRepository extends MongoRepository<Park, String> {
     @Query(value = "{'valorCobrado': {$eq: ?0}}")
     public List<Park> obterListaEnviarEmail(Double valor);
 
-    public List<Page<Park>> findAllByAtivaIsTrue(Pageable page);
+    public Page<Park> findAllByAtivaIsTrue(Pageable lista);
 }

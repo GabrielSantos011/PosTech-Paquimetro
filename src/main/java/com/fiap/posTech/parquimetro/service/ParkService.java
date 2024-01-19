@@ -8,9 +8,6 @@ import com.fiap.posTech.parquimetro.repository.ParkRepository;
 import com.fiap.posTech.parquimetro.repository.PessoaRepository;
 import com.fiap.posTech.parquimetro.repository.VeiculoRepository;
 
-import com.fiap.posTech.parquimetro.service.CalculaPrecoService;
-import lombok.RequiredArgsConstructor;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,7 +21,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Optional;
 
 
@@ -70,7 +66,6 @@ public class ParkService {
             double valorHora = CalculaPrecoService.getPrecoPorHora();
 
             // Salva o registro no banco de dados
-
             park.setAtiva(true);
 
             parkRepository.save(park);
@@ -119,8 +114,14 @@ public class ParkService {
         return this.parkRepository.findAll(lista);
     }
 
-    public List<Page<Park>> getParksAtivos(Pageable pageable) {
-        return parkRepository.findAllByAtivaIsTrue(pageable);
+    public Optional<Park> findById(String id) {
+        return this.parkRepository.findById(id);
+    }
+
+    public Page<Park> getParksAtivos(Pageable page) {
+        Sort sort = Sort.by("entrada").descending();
+        Pageable lista = PageRequest.of(page.getPageNumber(), page.getPageSize(), sort);
+        return this.parkRepository.findAllByAtivaIsTrue(lista);
     }
 
     private void cadastraEndereco(Endereco enderecoEstacionado) {

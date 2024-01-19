@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @RestController
@@ -34,10 +35,9 @@ public class ParkController {
         return ResponseEntity.ok(unparking);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<?> findById(@PathVariable String id) {
-        var parking = service.checkout(id);
-        return ResponseEntity.ok(parking);
+    @GetMapping("/{id}")
+    public Optional<Park> findById(@PathVariable String id) {
+        return this.service.findById(id);
     }
 
     @GetMapping
@@ -45,15 +45,21 @@ public class ParkController {
             @RequestParam(value = "pagina", defaultValue = "0") Integer pagina,
             @RequestParam(value = "quantidade", defaultValue = "20") Integer quantidade,
             @RequestParam(value = "direcao", defaultValue = "ASC") String direcao,
-            @RequestParam(value = "ordenacao", defaultValue = "descricao") String ordenacao) {
+            @RequestParam(value = "ordenacao", defaultValue = "pessoa.nome") String ordenacao) {
         PageRequest pageRequest = PageRequest.of(pagina, quantidade, Sort.Direction.valueOf(direcao), ordenacao);
         var list = service.listaTodos(pageRequest);
         return ResponseEntity.ok().body(list);
     }
 
     @GetMapping("/ativos")
-    public ResponseEntity<List<Page<Park>>> getParksAtivos(Pageable pageable) {
-        return ResponseEntity.ok(service.getParksAtivos(pageable));
+    public ResponseEntity<Page<Park>> getParksAtivos(
+            @RequestParam(value = "pagina", defaultValue = "0") Integer pagina,
+            @RequestParam(value = "quantidade", defaultValue = "20") Integer quantidade,
+            @RequestParam(value = "direcao", defaultValue = "ASC") String direcao,
+            @RequestParam(value = "ordenacao", defaultValue = "pessoa.nome") String ordenacao) {
+        PageRequest pageRequest = PageRequest.of(pagina, quantidade, Sort.Direction.valueOf(direcao), ordenacao);
+        var list = service.getParksAtivos(pageRequest);
+        return ResponseEntity.ok().body(list);
     }
 
 }
