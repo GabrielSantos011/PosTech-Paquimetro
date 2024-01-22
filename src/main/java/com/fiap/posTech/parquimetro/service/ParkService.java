@@ -11,6 +11,7 @@ import com.fiap.posTech.parquimetro.repository.ParkRepository;
 import com.fiap.posTech.parquimetro.repository.PessoaRepository;
 import com.fiap.posTech.parquimetro.repository.VeiculoRepository;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +31,8 @@ import java.util.Optional;
 @Service
 
 public class ParkService {
+    @Autowired
+    private ReciboService reciboService;
     private final ParkRepository parkRepository;
     private final PessoaRepository pessoaRepository;
     private final VeiculoRepository veiculoRepository;
@@ -98,6 +101,7 @@ public class ParkService {
             park.setAtiva(false);
 
             parkRepository.save(park);
+            reciboService.emitirRecibo(park);
 
             return new ResponseEntity<>(park,
                     HttpStatus.OK);

@@ -6,11 +6,16 @@ Spring Data com NoSQL, Persistencia de Dados e documentação com swagger.
 
 Para esse trabalho foi criado uma classe de schedule que verifica o tempo de parada e notifica o usuário com envio de email.
 A verificação ocorre a cada 2 minutos e verfica se existe vaga faltando 10 minutos para expirar.
-<br><br>
 
+
+## Hospedagem
+<hr>
 A nossa aplicação está hospedada utilizando a cloud do Render.com.
+
+## API
+<hr>
+
+* Documentação swagger -> https://parquimetro-8ch3.onrender.com/swagger-ui/index.html
 <br><br>
+* Actuator -> Verifica a saúde do app -> https://parquimetro-8ch3.onrender.com/actuator/health
 
-Documentação swagger -> https://parquimetro-8ch3.onrender.com/swagger-ui/index.html
-
-Actuator -> Verifica a saúde do app -> https://parquimetro-8ch3.onrender.com/actuator/health

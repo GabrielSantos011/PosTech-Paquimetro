@@ -30,7 +30,7 @@ public class ParkController {
     }
 
     @PutMapping(value = "/unparking/{id}")
-    @Operation(summary = "Efetua o cancelamento do estacionamento", method = "PUT")
+    @Operation(summary = "Efetua a saida da vaga", method = "PUT")
     public ResponseEntity<?> unparking(@PathVariable String id) {
         var unparking = service.checkout(id);
         return ResponseEntity.ok(unparking);

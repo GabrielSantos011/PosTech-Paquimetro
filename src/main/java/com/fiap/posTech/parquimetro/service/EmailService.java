@@ -13,10 +13,10 @@ public class EmailService {
         this.javaMailSender = javaMailSender;
     }
 
-    public void enviar(String enviarPara, String mensagem) {
+    public void enviar(String enviarPara, String mensagem, String assunto) {
         SimpleMailMessage email = new SimpleMailMessage();
         email.setTo(enviarPara);
-        email.setSubject("Tempo da vaga Expirando");
+        email.setSubject(assunto);
         email.setText(mensagem);
         javaMailSender.send(email);
     }
