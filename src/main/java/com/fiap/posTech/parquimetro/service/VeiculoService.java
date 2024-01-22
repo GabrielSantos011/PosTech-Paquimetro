@@ -6,27 +6,17 @@ import com.fiap.posTech.parquimetro.model.Veiculo;
 import com.fiap.posTech.parquimetro.repository.VeiculoRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @Service
 @RequiredArgsConstructor
 public class VeiculoService {
 
     private final VeiculoRepository veiculoRepository;
-
-    @ExceptionHandler(OptimisticLockingFailureException.class)
-    public ResponseEntity<String> handleOptimistcLockingFaulureException(
-            OptimisticLockingFailureException ex) {
-        return  ResponseEntity.status(HttpStatus.CONFLICT).
-                body("Erro de concorrência: O Veículo foi atualizado por outro usuario");
-    }
 
     public Page<Veiculo> findAll(Pageable pageable) {
         return veiculoRepository.findAll(pageable);

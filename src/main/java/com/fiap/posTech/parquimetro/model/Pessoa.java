@@ -48,7 +48,8 @@ public class Pessoa {
     @DBRef
     private Endereco endereco;
 
-    @DBRef
+    @JsonIgnore
+    @DBRef(lazy = true)
     private List<Veiculo> veiculos;
 
     @JsonIgnore
@@ -60,7 +61,10 @@ public class Pessoa {
     private Long version;
 
     public void adicionarVeiculo(Veiculo veiculo) {
-        this.veiculos.add(veiculo);
+        if (veiculos == null) {
+            veiculos = new ArrayList<>();
+        }
+        veiculos.add(veiculo);
         veiculo.setPessoa(this);
     }
 
