@@ -34,7 +34,7 @@ public class ScheduleVaga {
             lista.forEach(
                     park -> {
                         LocalDateTime now = LocalDateTime.now();
-                        Duration drt = Duration.between(park.getEntrada(), now);
+                        Duration drt = Duration.between(park.getSaida(), now);
                         LocalTime lt = LocalTime.ofNanoOfDay(drt.toNanos());
                         if (lt.getMinute() >= 50) {
                             var tempo = lt.format(DateTimeFormatter.ofPattern("HH:mm"));
@@ -54,7 +54,7 @@ public class ScheduleVaga {
             logger.info("Enviando email");
             String enviarPara = email;
             String mensagem = "O tempo de sua vaga está expirando....\n Fique atento para renovar o tempo da vaga. \n Tempo total na vaga: " + tempo;
-            emailService.enviar(enviarPara, mensagem);
+            emailService.enviar(enviarPara, mensagem, "Tempo da vaga Expirando");
             logger.info("Email enviado");
         }
     }

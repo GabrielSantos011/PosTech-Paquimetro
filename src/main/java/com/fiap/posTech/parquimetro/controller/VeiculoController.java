@@ -1,6 +1,7 @@
 package com.fiap.posTech.parquimetro.controller;
 
 import com.fiap.posTech.parquimetro.controller.exception.ControllerNotFoundException;
+import com.fiap.posTech.parquimetro.controller.exception.ErrorResponse;
 import com.fiap.posTech.parquimetro.controller.exception.ParkingException;
 import com.fiap.posTech.parquimetro.model.Pessoa;
 import com.fiap.posTech.parquimetro.model.Veiculo;
@@ -51,15 +52,18 @@ public class VeiculoController {
                                   @RequestParam String pessoaId) {
         try {
             Pessoa pessoa = pessoaService.findById(pessoaId);
-            pessoa.adicionarVeiculo(veiculo);
+            veiculo.setPessoa(pessoa);
             Veiculo savedVeiculo = veiculoService.save(veiculo);
+            pessoa.adicionarVeiculo(savedVeiculo);
             pessoaService.save(pessoa);
             return new ResponseEntity<>(savedVeiculo, HttpStatus.CREATED);
         } catch (ControllerNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado");
+            ErrorResponse errorResponse = new ErrorResponse(e.getTimestamp(), e.getStatus(), e.getError(), e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
         catch (ParkingException e) {
-            return ResponseEntity.status(e.getStatus()).body(e.getMessage());
+            ErrorResponse errorResponse = new ErrorResponse(e.getTimestamp(), e.getStatus(), e.getError(), e.getMessage());
+            return ResponseEntity.status(e.getStatus()).body(errorResponse);
         }
     }
 

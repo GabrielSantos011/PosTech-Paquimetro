@@ -1,5 +1,6 @@
 package com.fiap.posTech.parquimetro.controller;
 
+import com.fiap.posTech.parquimetro.controller.exception.ErrorResponse;
 import com.fiap.posTech.parquimetro.controller.exception.ParkingException;
 import com.fiap.posTech.parquimetro.model.EnumPagamento;
 import com.fiap.posTech.parquimetro.model.Pessoa;
@@ -14,8 +15,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-
 
 @RestController
 @RequestMapping(value = "/pessoas", produces = {"application/json"})
@@ -51,12 +50,16 @@ public class PessoaController {
             }
             EnumPagamento metodoPagamento = EnumPagamento.valueOf(formaPagamento.toUpperCase());
             pessoa.setFormaPagamento(metodoPagamento);
+
+            if (pessoa.getVeiculos() != null && pessoa.getVeiculos().stream().anyMatch(veiculo -> veiculo.getId() == null)) {
+                throw new ParkingException("Request Inválido!");
+            }
             Pessoa savedPessoa = pessoaService.save(pessoa);
             return new ResponseEntity<>(savedPessoa, HttpStatus.CREATED);
         }
         catch (ParkingException e) {
-            //ErrorResponse errorResponse = new ErrorResponse(e.getTimestamp(), e.getStatus(), e.getError(), e.getMessage());
-            return ResponseEntity.status(e.getStatus()).body(e.getMessage());
+            ErrorResponse errorResponse = new ErrorResponse(e.getTimestamp(), e.getStatus(), e.getError(), e.getMessage());
+            return ResponseEntity.status(e.getStatus()).body(errorResponse);
         }
     }
 
@@ -75,8 +78,8 @@ public class PessoaController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{id}/forma-pagamento")
-    @Operation(summary = "Cadastrar metodo de pagamento por Id", method = "POST")
+    @PutMapping("/{id}/forma-pagamento")
+    @Operation(summary = "Atualizar metodo de pagamento por Id", method = "PUT")
     public ResponseEntity<Object> definirFormaPagamento(@PathVariable String id,
                                                         @RequestParam @Valid String formaPagamento) {
         try {
@@ -87,8 +90,7 @@ public class PessoaController {
             Pessoa pessoa = pessoaService.definirFormaPagamento(id, metodoPagamento);
             return ResponseEntity.ok(pessoa);
         } catch (ParkingException e) {
-//            return ResponseEntity.status(e.getStatus()).body(new ErrorResponse(e.getTimestamp(), e.getStatus(), e.getError(), e.getMessage()));
-            return ResponseEntity.status(e.getStatus()).body(e.getMessage());
+            return ResponseEntity.status(e.getStatus()).body(new ErrorResponse(e.getTimestamp(), e.getStatus(), e.getError(), e.getMessage()));
         }
 
     }
