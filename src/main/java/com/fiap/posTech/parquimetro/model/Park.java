@@ -1,6 +1,7 @@
 package com.fiap.posTech.parquimetro.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,12 +27,10 @@ public class Park {
     private LocalDateTime saida;
     private double valorHora;
     private double valorCobrado;
-    private String tipoTempo; // Fixo ou Hora
+    private EnumPark tipoTempo;
     private String permanencia;
     private Boolean ativa = false;
-
-    @DBRef
-    private Endereco enderecoEstacionado;
+    private Integer tempoFixo;
 
     @DBRef
     private Pessoa pessoa;

@@ -12,6 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -61,6 +62,13 @@ public class ParkController {
             @RequestParam(value = "ordenacao", defaultValue = "pessoa.nome") String ordenacao) {
         PageRequest pageRequest = PageRequest.of(pagina, quantidade, Sort.Direction.valueOf(direcao), ordenacao);
         var list = service.getParksAtivos(pageRequest);
+        return ResponseEntity.ok().body(list);
+    }
+
+    @GetMapping("/ativos-fixo")
+    @Operation(summary = "Obtem todo o cadastro do estacionamento que estão ativos", method = "GET")
+    public ResponseEntity<List<Park>> getParksAtivosComTempoFixo() {
+        var list = service.getParksAtivosComTempoFixo();
         return ResponseEntity.ok().body(list);
     }
 
