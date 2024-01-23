@@ -63,17 +63,15 @@ public class ParkService {
             LocalDateTime now = LocalDateTime.now();
             park.setEntrada(now);
 
-            // Chama o serviço de cálculo de preço
-            CalculaPrecoService calculaPrecoService = new CalculaPrecoService();
-            double valorCobrado = calculaPrecoService.calcularPreco(park);
             double valorHora = CalculaPrecoService.getPrecoPorHora();
+            park.setValorHora(valorHora);
 
             // Salva o registro no banco de dados
             park.setAtiva(true);
 
             parkRepository.save(park);
 
-            return new ResponseEntity<>("Parking cadastrado com sucesso. Valor da hora: R$ " + valorHora + " Preço total: R$ " + valorCobrado,
+            return new ResponseEntity<>("Parking cadastrado com sucesso. Valor da hora: R$ " + valorHora,
                     HttpStatus.CREATED);
 
         } catch (Exception e) {
@@ -91,17 +89,24 @@ public class ParkService {
 
             LocalDateTime now = LocalDateTime.now();
             Duration drt = Duration.between(park.getEntrada(), now);
-
-            LocalTime lt = LocalTime.ofNanoOfDay(drt.toNanos());
-            var tempo = lt.format(DateTimeFormatter.ofPattern("HH:mm"));
-            park.setSaida(now);
-            park.setPermanencia(tempo);
-            park.setAtiva(false);
+            if(park.getAtiva()) {
+                LocalTime lt = LocalTime.ofNanoOfDay(drt.toNanos());
+                var tempo = lt.format(DateTimeFormatter.ofPattern("HH:mm"));
+                park.setSaida(now);
+                park.setPermanencia(tempo);
+                park.setAtiva(false);
+            } else {
+                return new ResponseEntity<>(mensagem.TrataMensagemErro("O parking já foi finalizado!"),
+                        HttpStatus.BAD_REQUEST);
+            }
+            // Chama o serviço de cálculo de preço
+            CalculaPrecoService calculaPrecoService = new CalculaPrecoService();
+            double valorCobrado = calculaPrecoService.calcularPreco(park);
 
             parkRepository.save(park);
             reciboService.emitirRecibo(park);
 
-            return new ResponseEntity<>(park,
+            return new ResponseEntity<>("Checkout realizado com sucesso. Valor total: R$ " + valorCobrado,
                     HttpStatus.OK);
 
         } catch (Exception e) {
