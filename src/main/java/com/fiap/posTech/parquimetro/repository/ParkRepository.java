@@ -15,4 +15,6 @@ public interface ParkRepository extends MongoRepository<Park, String> {
     public List<Park> obterListaEnviarEmail(Double valor);
 
     public Page<Park> findAllByAtivaIsTrue(Pageable lista);
+
+    public List<Park> findAllByAtivaIsTrueAndTipoTempoFIXO();
 }

@@ -22,6 +22,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -54,11 +55,6 @@ public class ParkService {
             Veiculo veiculo = veiculoRepository.findById(park.getVeiculo().getId())
                     .orElseThrow(() -> new ControllerNotFoundException("Veículo não encontrado"));
 
-            Optional<Endereco> endereco;
-            endereco = enderecoRepository.findById(park.getEnderecoEstacionado().getId());
-            if (endereco == null) {
-                cadastraEndereco(park.getEnderecoEstacionado());
-            }
 
             LocalDateTime now = LocalDateTime.now();
             park.setEntrada(now);
@@ -88,7 +84,6 @@ public class ParkService {
         try {
             Park park = parkRepository.findById(id)
                     .orElseThrow(() -> new ControllerNotFoundException("Parking não encontrado"));
-
             LocalDateTime now = LocalDateTime.now();
             Duration drt = Duration.between(park.getEntrada(), now);
 
@@ -128,16 +123,8 @@ public class ParkService {
         return this.parkRepository.findAllByAtivaIsTrue(lista);
     }
 
-    private void cadastraEndereco(Endereco enderecoEstacionado) {
-        Endereco end = new Endereco();
-        end.setTipoLogradouro(enderecoEstacionado.getTipoLogradouro());
-        end.setLogradouro(enderecoEstacionado.getLogradouro());
-        end.setNumero(enderecoEstacionado.getNumero());
-        end.setComplemento(enderecoEstacionado.getComplemento());
-        end.setBairro(enderecoEstacionado.getBairro());
-        end.setCidade(enderecoEstacionado.getCidade());
-        end.setUf(enderecoEstacionado.getUf());
-        end.setCep(enderecoEstacionado.getCep());
-        enderecoRepository.save(end);
+    public List<Park> getParksAtivosComTempoFixo(){
+        return this.parkRepository.findAllByAtivaIsTrueAndTipoTempoFIXO();
     }
+
 }

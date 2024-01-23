@@ -3,9 +3,11 @@ package com.fiap.posTech.parquimetro.controller.schedule;
 import com.fiap.posTech.parquimetro.model.Park;
 import com.fiap.posTech.parquimetro.repository.ParkRepository;
 import com.fiap.posTech.parquimetro.service.EmailService;
+import com.fiap.posTech.parquimetro.service.ParkService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +15,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 
@@ -22,6 +25,8 @@ public class ScheduleVaga {
     private EmailService emailService;
     @Autowired
     private ParkRepository repository;
+    @Autowired
+    private ParkService parkService;
 
     private final Logger logger = LoggerFactory.getLogger(ScheduleVaga.class);
     private final long Minuto = 120000; // 2 minutos
@@ -47,6 +52,37 @@ public class ScheduleVaga {
             e.printStackTrace(System.out);
         }
     }
+
+    @Scheduled(fixedDelay = Minuto)
+    public void validaVagaTempoFixo(){
+        try {
+            logger.info("Verificando o tempo restante");
+            List<Park> lista = repository.findAllByAtivaIsTrueAndTipoTempoFIXO();
+            lista.forEach(
+                    park -> {
+                        LocalDateTime entrada = park.getEntrada();
+                        Integer tempoFixo = park.getTempoFixo();
+
+                        LocalDateTime horaAtual = LocalDateTime.now();
+                        LocalDateTime tempoExpiracao = entrada.plus(tempoFixo, ChronoUnit.HOURS);
+
+                        // Adicionando uma tolerância de 7 minutos
+                        LocalDateTime tempoComTolerancia = tempoExpiracao.plus(7, ChronoUnit.MINUTES);
+
+                        if (horaAtual.isAfter(tempoComTolerancia)) {
+                            // O tempo estimado expirou com a tolerância
+                            // Faça o que precisa ser feito, por exemplo, enviar um email
+                            parkService.checkout(park.getId());
+                        }
+
+                    }
+            );
+        } catch (Exception e) {
+            logger.error("Erro ao executar a validação de vagas. Erro: " + e.getMessage());
+            e.printStackTrace(System.out);
+        }
+    }
+
 
     private void enviaEmail(String tempo, Park park) {
         var email = park.getPessoa().getEmail();
