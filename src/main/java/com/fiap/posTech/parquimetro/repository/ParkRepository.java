@@ -16,5 +16,6 @@ public interface ParkRepository extends MongoRepository<Park, String> {
 
     public Page<Park> findAllByAtivaIsTrue(Pageable lista);
 
+    @Query("{ 'ativa' : true, 'tipoTempo' : 'FIXO' }")
     public List<Park> findAllByAtivaIsTrueAndTipoTempoFIXO();
 }
