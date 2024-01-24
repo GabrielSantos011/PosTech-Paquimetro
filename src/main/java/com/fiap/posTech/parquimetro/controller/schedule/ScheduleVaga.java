@@ -68,7 +68,8 @@ public class ScheduleVaga {
 
                         // Adicionando uma tolerância de 7 minutos
                         LocalDateTime tempoComTolerancia = tempoExpiracao.plus(7, ChronoUnit.MINUTES);
-
+                        System.out.println(tempoComTolerancia);
+                        System.out.println(horaAtual);
                         if (horaAtual.isAfter(tempoComTolerancia)) {
                             // O tempo estimado expirou com a tolerância
                             // Faça o que precisa ser feito, por exemplo, enviar um email
@@ -78,7 +79,7 @@ public class ScheduleVaga {
                     }
             );
         } catch (Exception e) {
-            logger.error("Erro ao executar a validação de vagas. Erro: " + e.getMessage());
+            logger.error("Erro ao executar a validação de vagas 2. Erro: " + e.getMessage());
             e.printStackTrace(System.out);
         }
     }
