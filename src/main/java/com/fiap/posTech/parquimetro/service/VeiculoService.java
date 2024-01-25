@@ -2,6 +2,7 @@ package com.fiap.posTech.parquimetro.service;
 
 import com.fiap.posTech.parquimetro.controller.exception.ControllerNotFoundException;
 import com.fiap.posTech.parquimetro.controller.exception.CustomException;
+import com.fiap.posTech.parquimetro.model.Pessoa;
 import com.fiap.posTech.parquimetro.model.Veiculo;
 import com.fiap.posTech.parquimetro.repository.VeiculoRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -11,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +34,27 @@ public class VeiculoService {
             throw new CustomException("Erro ao buscar Veiculo", HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error");
         }
     }
+
+    @Transactional
+    public Veiculo findByPlaca(String placa) {
+        try {
+            return veiculoRepository.findByPlaca(placa).orElseThrow(() -> new ControllerNotFoundException("Veiculo não encontrado"));
+        } catch (ControllerNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new CustomException("Erro ao buscar Veiculo", HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error");
+        }
+    }
+
+    @Transactional
+    public List<Veiculo> findByPessoa(Pessoa pessoa) {
+        try {
+            return pessoa.getVeiculos();
+        } catch (Exception e) {
+            throw new CustomException("Erro ao buscar Veiculos do(a): " + pessoa.getNome(), HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error");
+        }
+    }
+
     @Transactional
     public Veiculo save(Veiculo veiculo) {
         return veiculoRepository.save(veiculo);

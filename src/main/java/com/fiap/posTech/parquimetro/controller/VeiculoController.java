@@ -18,6 +18,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 
 @RestController
 @RequestMapping(value = "/veiculos", produces = {"application/json"})
@@ -44,6 +46,21 @@ public class VeiculoController {
     public ResponseEntity<Veiculo> findById(@PathVariable String id) {
         var veiculo = veiculoService.findById(id);
         return ResponseEntity.ok(veiculo);
+    }
+
+    @GetMapping("/placa/{placa}")
+    @Operation(summary = "Procurar Veículo por Placa", method = "GET")
+    public ResponseEntity<Veiculo> findByPlaca(@PathVariable String placa) {
+        var veiculo = veiculoService.findByPlaca(placa);
+        return ResponseEntity.ok(veiculo);
+    }
+
+    @GetMapping("/pessoa/{pessoaId}")
+    @Operation(summary = "Procurar Veículo por Placa", method = "GET")
+    public ResponseEntity<List<Veiculo>> findByPessoaId(@PathVariable String pessoaId) {
+        var pessoa = pessoaService.findById(pessoaId);
+        var veiculos = veiculoService.findByPessoa(pessoa);
+        return ResponseEntity.ok(veiculos);
     }
 
     @PostMapping
