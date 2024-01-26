@@ -15,7 +15,13 @@ A nossa aplicação está hospedada utilizando a cloud do Render.com.
 ## API
 <hr>
 
-* Documentação swagger -> https://parquimetro-8ch3.onrender.com/swagger-ui/index.html
-<br><br>
-* Actuator -> Verifica a saúde do app -> https://parquimetro-8ch3.onrender.com/actuator/health
+> **Documentação swagger ->** https://parquimetro-8ch3.onrender.com/swagger-ui/index.html
+><br><br>
+> **Actuator -> Verifica a saúde do app ->** https://parquimetro-8ch3.onrender.com/actuator/health
 
+## Projeto Git
+Para instalar esse aplicativo localmente, execute os comandos: 
+```shell
+git clone https://github.com/GabrielSantos011/PosTech-Parquimetro.git parquimetro
+cd parquimetro
+```

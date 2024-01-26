@@ -39,7 +39,7 @@ public class ScheduleVaga {
             lista.forEach(
                     park -> {
                         LocalDateTime now = LocalDateTime.now();
-                        Duration drt = Duration.between(park.getSaida(), now);
+                        Duration drt = Duration.between(park.getEntrada(), now);
                         LocalTime lt = LocalTime.ofNanoOfDay(drt.toNanos());
                         if (lt.getMinute() >= 50) {
                             var tempo = lt.format(DateTimeFormatter.ofPattern("HH:mm"));
