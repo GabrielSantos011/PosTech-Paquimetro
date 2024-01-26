@@ -24,6 +24,7 @@ public class ParkController {
     private ParkService service;
     
     @PostMapping
+    @Operation(summary = "Efetua a parada do veículo na vaga", method = "POST")
     public ResponseEntity<?> parking(@Valid @RequestBody Park parking) {
         return this.service.checkin(parking);
     }
