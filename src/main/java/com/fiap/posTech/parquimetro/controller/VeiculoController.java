@@ -3,7 +3,6 @@ package com.fiap.posTech.parquimetro.controller;
 import com.fiap.posTech.parquimetro.controller.exception.ControllerNotFoundException;
 import com.fiap.posTech.parquimetro.controller.exception.ErrorResponse;
 import com.fiap.posTech.parquimetro.controller.exception.ParkingException;
-import com.fiap.posTech.parquimetro.model.Pessoa;
 import com.fiap.posTech.parquimetro.model.Veiculo;
 import com.fiap.posTech.parquimetro.service.PessoaService;
 import com.fiap.posTech.parquimetro.service.VeiculoService;
@@ -68,21 +67,17 @@ public class VeiculoController {
     public ResponseEntity<?> save(@Valid @RequestBody Veiculo veiculo,
                                   @RequestParam String pessoaId) {
         try {
-            Pessoa pessoa = pessoaService.findById(pessoaId);
-            veiculo.setPessoa(pessoa);
-            Veiculo savedVeiculo = veiculoService.save(veiculo);
-            pessoa.adicionarVeiculo(savedVeiculo);
-            pessoaService.save(pessoa);
+            Veiculo savedVeiculo = veiculoService.save(veiculo, pessoaId);
             return new ResponseEntity<>(savedVeiculo, HttpStatus.CREATED);
         } catch (ControllerNotFoundException e) {
             ErrorResponse errorResponse = new ErrorResponse(e.getTimestamp(), e.getStatus(), e.getError(), e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
-        }
-        catch (ParkingException e) {
+        } catch (ParkingException e) {
             ErrorResponse errorResponse = new ErrorResponse(e.getTimestamp(), e.getStatus(), e.getError(), e.getMessage());
             return ResponseEntity.status(e.getStatus()).body(errorResponse);
         }
     }
+
 
     @PutMapping("/{id}")
     @Operation(summary = "Alterar um Veículo já cadastrada por Id", method = "PUT")

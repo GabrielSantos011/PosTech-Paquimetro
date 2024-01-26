@@ -2,6 +2,7 @@ package com.fiap.posTech.parquimetro.service;
 
 import com.fiap.posTech.parquimetro.controller.exception.ControllerNotFoundException;
 import com.fiap.posTech.parquimetro.controller.exception.CustomException;
+import com.fiap.posTech.parquimetro.controller.exception.ParkingException;
 import com.fiap.posTech.parquimetro.model.Pessoa;
 import com.fiap.posTech.parquimetro.model.Veiculo;
 import com.fiap.posTech.parquimetro.repository.VeiculoRepository;
@@ -20,6 +21,8 @@ import java.util.List;
 public class VeiculoService {
 
     private final VeiculoRepository veiculoRepository;
+
+    private final PessoaService pessoaService;
 
     public Page<Veiculo> findAll(Pageable pageable) {
         return veiculoRepository.findAll(pageable);
@@ -56,9 +59,18 @@ public class VeiculoService {
     }
 
     @Transactional
-    public Veiculo save(Veiculo veiculo) {
-        return veiculoRepository.save(veiculo);
+    public Veiculo save(Veiculo veiculo, String pessoaId) {
+        if (veiculoRepository.existsByPlaca(veiculo.getPlaca())) {
+            throw new ParkingException("Veiculo com a placa " + veiculo.getPlaca() + " já cadastrado.");
+        }
+        Pessoa pessoa = pessoaService.findById(pessoaId);
+        veiculo.setPessoa(pessoa);
+        Veiculo savedVeiculo = veiculoRepository.save(veiculo);
+        pessoa.adicionarVeiculo(savedVeiculo);
+        pessoaService.save(pessoa);
+        return savedVeiculo;
     }
+
     @Transactional
     public Veiculo update(String id, Veiculo updatedVeiculo) {
         try {
@@ -67,7 +79,6 @@ public class VeiculoService {
 
             veiculo.setModelo(updatedVeiculo.getModelo());
             veiculo.setCor(updatedVeiculo.getCor());
-            veiculo.setModelo(updatedVeiculo.getModelo());
             veiculo.setAnoFabrica(updatedVeiculo.getAnoFabrica());
             veiculo.setAnoModelo(updatedVeiculo.getAnoModelo());
             veiculo.setPlaca(updatedVeiculo.getPlaca());
@@ -83,3 +94,4 @@ public class VeiculoService {
     }
 
 }
+

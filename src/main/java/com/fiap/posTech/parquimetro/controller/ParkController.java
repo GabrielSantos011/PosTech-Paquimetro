@@ -1,5 +1,7 @@
 package com.fiap.posTech.parquimetro.controller;
 
+import com.fiap.posTech.parquimetro.controller.exception.CustomException;
+import com.fiap.posTech.parquimetro.controller.exception.ErrorResponse;
 import com.fiap.posTech.parquimetro.model.Park;
 import com.fiap.posTech.parquimetro.service.ParkService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,20 +22,30 @@ import java.util.Optional;
 @RequestMapping(value = "/park", produces = {"application/json"})
 @Tag(name = "Cadastro de Parking", description = "CRUD de Parking")
 public class ParkController {
+
     @Autowired
     private ParkService service;
     
     @PostMapping
     @Operation(summary = "Efetua a parada do veículo na vaga", method = "POST")
     public ResponseEntity<?> parking(@Valid @RequestBody Park parking) {
-        return this.service.checkin(parking);
+        try {
+            return  service.checkin(parking);
+        } catch (CustomException e) {
+            ErrorResponse errorResponse = new ErrorResponse(e.getTimestamp(), e.getStatus(), e.getError(), e.getMessage());
+            return ResponseEntity.status(e.getStatus()).body(errorResponse);
+        }
     }
 
     @PutMapping(value = "/unparking/{id}")
     @Operation(summary = "Efetua a saida da vaga", method = "PUT")
     public ResponseEntity<?> unparking(@PathVariable String id) {
-        var unparking = service.checkout(id);
-        return ResponseEntity.ok(unparking);
+        try {
+            return service.checkout(id);
+        } catch (CustomException e) {
+            ErrorResponse errorResponse = new ErrorResponse(e.getTimestamp(), e.getStatus(), e.getError(), e.getMessage());
+            return ResponseEntity.status(e.getStatus()).body(errorResponse);
+        }
     }
 
     @GetMapping("/{id}")

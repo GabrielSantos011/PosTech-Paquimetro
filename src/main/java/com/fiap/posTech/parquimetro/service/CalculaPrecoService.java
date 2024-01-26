@@ -2,15 +2,11 @@ package com.fiap.posTech.parquimetro.service;
 
 import com.fiap.posTech.parquimetro.model.EnumPark;
 import com.fiap.posTech.parquimetro.model.Park;
-
 import com.fiap.posTech.parquimetro.repository.ParkRepository;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.LocalDateTime;
 

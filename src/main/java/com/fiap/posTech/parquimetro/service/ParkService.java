@@ -1,14 +1,17 @@
 package com.fiap.posTech.parquimetro.service;
 
 import com.fiap.posTech.parquimetro.controller.exception.ControllerNotFoundException;
-import com.fiap.posTech.parquimetro.controller.exception.TrataMensagem;
-import com.fiap.posTech.parquimetro.model.*;
-import com.fiap.posTech.parquimetro.repository.EnderecoRepository;
+import com.fiap.posTech.parquimetro.controller.exception.CustomException;
+import com.fiap.posTech.parquimetro.controller.exception.ErrorResponse;
+import com.fiap.posTech.parquimetro.model.Park;
+import com.fiap.posTech.parquimetro.model.Pessoa;
+import com.fiap.posTech.parquimetro.model.Veiculo;
 import com.fiap.posTech.parquimetro.repository.ParkRepository;
 import com.fiap.posTech.parquimetro.repository.PessoaRepository;
 import com.fiap.posTech.parquimetro.repository.VeiculoRepository;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,53 +30,52 @@ import java.util.Optional;
 
 
 @Service
-
+@RequiredArgsConstructor
 public class ParkService {
-    @Autowired
-    private ReciboService reciboService;
+
+    private static final Logger logger = LoggerFactory.getLogger(ParkService.class);
+
+    private final ReciboService reciboService;
+    private final PessoaService pessoaService;
     private final ParkRepository parkRepository;
     private final PessoaRepository pessoaRepository;
     private final VeiculoRepository veiculoRepository;
-    private final EnderecoRepository enderecoRepository;
-    private final TrataMensagem mensagem;
-
-    public ParkService(ParkRepository parkRepository, PessoaRepository pessoaRepository,
-                       VeiculoRepository veiculoRepository, EnderecoRepository enderecoRepository) {
-        this.parkRepository = parkRepository;
-        this.pessoaRepository = pessoaRepository;
-        this.veiculoRepository = veiculoRepository;
-        this.enderecoRepository = enderecoRepository;
-        this.mensagem = new TrataMensagem();
-    }
 
     @Transactional
     public ResponseEntity<?> checkin(Park park) {
         try {
             Pessoa pessoa = pessoaRepository.findById(park.getPessoa().getId())
                     .orElseThrow(() -> new ControllerNotFoundException("Pessoa não encontrada"));
-
             Veiculo veiculo = veiculoRepository.findById(park.getVeiculo().getId())
                     .orElseThrow(() -> new ControllerNotFoundException("Veículo não encontrado"));
 
+            if (!pessoa.getVeiculos().stream().anyMatch(v -> v.getId().equals(veiculo.getId()))) {
+                logger.error("O veículo não está vinculado à pessoa.");
+                throw new CustomException("O veículo não está vinculado à pessoa.", HttpStatus.BAD_REQUEST.value(), "Bad Request");
+            }
 
+            park.setPessoa(pessoa);
             LocalDateTime now = LocalDateTime.now();
             park.setEntrada(now);
-
             double valorHora = CalculaPrecoService.getPrecoPorHora();
             park.setValorHora(valorHora);
 
             // Salva o registro no banco de dados
             park.setAtiva(true);
-
             parkRepository.save(park);
+            pessoa.adicionarPark(park);
+            pessoaService.save(pessoa);
 
             return new ResponseEntity<>("Parking cadastrado com sucesso. Valor da hora: R$ " + valorHora,
                     HttpStatus.CREATED);
 
+        } catch (ControllerNotFoundException e) {
+            throw e;
+        } catch (CustomException e) {
+            ErrorResponse errorResponse = new ErrorResponse(e.getTimestamp(), e.getStatus(), e.getError(), e.getMessage());
+            return ResponseEntity.status(e.getStatus()).body(errorResponse);
         } catch (Exception e) {
-            e.printStackTrace(System.out);
-            return new ResponseEntity<>(mensagem.TrataMensagemErro("Erro ao cadastrar parking"),
-                    HttpStatus.BAD_REQUEST);
+            throw new CustomException("Erro ao cadastrar park", HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error");
         }
     }
 
@@ -91,8 +93,7 @@ public class ParkService {
                 park.setPermanencia(tempo);
                 park.setAtiva(false);
             } else {
-                return new ResponseEntity<>(mensagem.TrataMensagemErro("O parking já foi finalizado!"),
-                        HttpStatus.BAD_REQUEST);
+                throw new CustomException("O parking já foi finalizado!", HttpStatus.BAD_REQUEST.value(), "Bad Request");
             }
             // Chama o serviço de cálculo de preço
             CalculaPrecoService calculaPrecoService = new CalculaPrecoService();
@@ -104,10 +105,13 @@ public class ParkService {
             return new ResponseEntity<>("Checkout realizado com sucesso. Valor total: R$ " + valorCobrado,
                     HttpStatus.OK);
 
+        } catch (ControllerNotFoundException e) {
+            throw new CustomException("Parking não encontrado", HttpStatus.NOT_FOUND.value(), "Not Found");
+        } catch (CustomException e) {
+            ErrorResponse errorResponse = new ErrorResponse(e.getTimestamp(), e.getStatus(), e.getError(), e.getMessage());
+            return ResponseEntity.status(e.getStatus()).body(errorResponse);
         } catch (Exception e) {
-            e.printStackTrace(System.out);
-            return new ResponseEntity<>(mensagem.TrataMensagemErro("Erro ao alterar parking"),
-                    HttpStatus.BAD_REQUEST);
+            throw new CustomException("Erro ao alterar o Parking", HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error");
         }
     }
 

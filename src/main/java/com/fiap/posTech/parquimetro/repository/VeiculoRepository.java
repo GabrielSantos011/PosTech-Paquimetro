@@ -8,5 +8,6 @@ import java.util.Optional;
 public interface VeiculoRepository extends MongoRepository<Veiculo, String> {
 
     Optional<Veiculo> findByPlaca(String placa);
+    boolean existsByPlaca(String placa);
 
 }

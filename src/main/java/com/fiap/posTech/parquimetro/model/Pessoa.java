@@ -57,8 +57,20 @@ public class Pessoa {
     private List<Pagamento> pagamentos;
 
     @JsonIgnore
+    @DBRef
+    private List<Park> parks;
+
+    @JsonIgnore
     @Version
     private Long version;
+
+    public void adicionarPark(Park park) {
+        if (parks == null) {
+            parks = new ArrayList<>();
+        }
+        parks.add(park);
+        park.setPessoa(this);
+    }
 
     public void adicionarVeiculo(Veiculo veiculo) {
         if (veiculos == null) {

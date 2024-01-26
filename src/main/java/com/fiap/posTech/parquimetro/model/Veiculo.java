@@ -2,6 +2,7 @@ package com.fiap.posTech.parquimetro.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -30,6 +31,7 @@ public class Veiculo {
     @NotBlank(message = "O Ano do Modelo não pode estar em branco.")
     private String anoModelo;
     @NotBlank(message = "A Placa não pode estar em branco.")
+    @Pattern(regexp = "^[A-Z]{3}-\\d{4}$", message = "Formato de placa inválido. Utilize o formato AAA-1234.")
     private String placa;
 
     @JsonIgnore
