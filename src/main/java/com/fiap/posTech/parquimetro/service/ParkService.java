@@ -3,9 +3,7 @@ package com.fiap.posTech.parquimetro.service;
 import com.fiap.posTech.parquimetro.controller.exception.ControllerNotFoundException;
 import com.fiap.posTech.parquimetro.controller.exception.CustomException;
 import com.fiap.posTech.parquimetro.controller.exception.ErrorResponse;
-import com.fiap.posTech.parquimetro.model.Park;
-import com.fiap.posTech.parquimetro.model.Pessoa;
-import com.fiap.posTech.parquimetro.model.Veiculo;
+import com.fiap.posTech.parquimetro.model.*;
 import com.fiap.posTech.parquimetro.repository.ParkRepository;
 import com.fiap.posTech.parquimetro.repository.PessoaRepository;
 import com.fiap.posTech.parquimetro.repository.VeiculoRepository;
@@ -59,6 +57,11 @@ public class ParkService {
             park.setEntrada(now);
             double valorHora = CalculaPrecoService.getPrecoPorHora();
             park.setValorHora(valorHora);
+
+            // Verifica se a forma de pagamento é PIX e se o tipo de tempo é FIXO
+            if (EnumPagamento.PIX.getDescricao().equalsIgnoreCase(pessoa.getFormaPagamento().toString()) && !EnumPark.FIXO.getDescricao().equals(park.getTipoTempo().getDescricao())) {
+                throw new CustomException("PIX só está disponível para períodos de estacionamento fixo.", HttpStatus.BAD_REQUEST.value(), "Bad Request");
+            }
 
             // Salva o registro no banco de dados
             park.setAtiva(true);
